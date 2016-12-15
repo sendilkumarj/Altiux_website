@@ -1,0 +1,158 @@
+<html>
+<head>
+	<title>Light Control</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc20">
+	<meta name="resourceName" content="light.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-lighting:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ./ALTIUX-DEFAULT-V1/res/common/jquery/ -->
+	<link rel="stylesheet" href="./ALTIUX-DEFAULT-V1/res/common/jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="./ALTIUX-DEFAULT-V1/res/common/jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="./ALTIUX-DEFAULT-V1/res/common/jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+
+<div data-role="header">
+	<h1>Lights</h1><h1>Ceiling Inner</h1>
+</div>
+<center>
+<div data-role="fieldcontain" class="pageload">
+<table CELLSPACING=5 width="480" >
+	<tr><td>&nbsp;</td></tr>
+    <tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+			<label>Lamp Switch</label>
+		</td>
+  		<td>
+			<a href ="javascript:doAction('light')">
+			<img name=light src="" alt="Light" width="128" height="128" align="middle" />
+			</a>
+		</td>
+    </tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td></td><td><div id="content"></div></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<!--
+    <tr>
+    <td>
+		<label for="slider-0">Lamp Dim Level</label>
+	</td>
+	<td>
+		<input type="range" name="slider" id="slider01" value="25" min="0" max="100"  />
+	</td>
+	</tr>
+	-->
+</table>
+</div>
+</center>
+
+<script type="text/javascript">
+
+
+var amiLoaded = false;
+
+var ctrlType	= "Unknown";
+var onImg		= "light_b.png";
+var offImg		= "bulb-icon.png";
+var imgUrl      = "./ALTIUX-DEFAULT-V1/res/userTemplates/default/images/";
+
+var CTRL_NAME 	= "Ceiling Light Inner";
+
+
+function getImageUrl(boolOnOff){
+	if(boolOnOff){
+		return imgUrl + onImg;
+	}else{
+		return imgUrl + offImg;
+	}
+}
+
+
+function onExit(){
+	parent.deRegisterConnectEvent(onConnect);
+	parent.deRegisterRefreshEvent(updateStatus);
+	amiLoaded = false;
+	console.log("onExit called...");
+}
+
+window.onunload = onExit;
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+	console.log("##CTRL-TYPE##:"+ctrlType);
+
+	if(ctrlType.toLowerCase() == "tube"){
+		document['light'].height = "256";
+		document['light'].width = "256";
+		onImg	= "tlon.gif";
+		offImg	= "tloff.gif";
+	}
+
+	document['light'].src = getImageUrl(false);
+
+
+	$("#slider01").bind("change", function(event, ui) {
+	  var slider_value = $('#slider01').val();
+	  changeDimLevel(slider_value);
+	});
+
+	amiLoaded = true;
+	parent.registerConnectEvent(onConnect);
+	onConnect();
+	updateStatus();
+});
+
+function onConnect(){
+	parent.registerRefreshEvent(updateStatus);
+	parent.getStatus(CTRL_NAME);
+	console.log("1Test Default Client-Id:" + window.parent.defaultClientId());
+}
+
+function updateStatus(){
+	console.log("Refresh Event");
+	var inode = parent.findInode(CTRL_NAME);
+	if(inode != null){
+		var curStatus = parseInt(inode.lastStatus,16);
+		if(curStatus == 0)
+		{
+			document['light'].src=getImageUrl(false);
+			console.log("Turned OFF");
+		}
+		else
+		{
+			document['light'].src=getImageUrl(true);;
+			console.log("Turned ON");
+		}
+	}
+}
+
+function doAction(img_name)
+{
+	var swState = 'ff';
+
+	if(document[img_name].src.search(offImg)==-1){
+		//OFF
+		swState = '00';
+		$('#slider01').val(0);
+		$('#slider01').slider('refresh');
+	}
+
+	parent.changeStatus(CTRL_NAME,swState);
+	//parent.getStatus(CTRL_NAME);
+
+}
+
+
+function aclick(){
+	window.location.href = 'self.html';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

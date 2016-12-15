@@ -1,0 +1,144 @@
+<html>
+<head>
+        <title>DRAPES Control</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- ./common/jquery/ -->
+        <link rel="stylesheet" href="./ALTIUX-DEFAULT-V1/res/common/jquery/mobile/1.0/jquery.mobile-1.0.min.css" />
+        <script type="text/javascript" src="./ALTIUX-DEFAULT-V1/res/common/jquery/jquery-1.6.4.min.js"></script>
+        <script type="text/javascript" src="./ALTIUX-DEFAULT-V1/res/common/jquery/mobile/1.0/jquery.mobile-1.0.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+<div data-role="header">
+        <h1>Drapes / Curtains</h1><h1>Experience Center</h1>
+</div>
+<center>
+<div data-role="fieldcontain">
+<table CELLSPACING=10>
+        <tr><td>&nbsp;</td></tr>
+    <tr><td>&nbsp;</td></tr>
+        <tr>
+        <td align="center">
+        <label>Operations</label>
+        </td>
+    </tr>
+        <tr>
+                <td align="center">
+                <fieldset data-role="controlgroup" data-type="horizontal">
+                                <input type="radio" name="radio-choice-1" id="radio-choice-1" value="1"  />
+                                <label for="radio-choice-1">Open</label>
+
+                                <input type="radio" name="radio-choice-1" id="radio-choice-2" value="2"  />
+                                <label for="radio-choice-2">Pause</label>
+
+                                <input type="radio" name="radio-choice-1" id="radio-choice-3" value="3"  />
+                                <label for="radio-choice-3">Close</label>
+                </fieldset>
+                </td>
+        </tr>
+        <tr><td>&nbsp;</td></tr>
+        <tr><td>&nbsp;</td></tr>
+</table>
+</div>
+
+</center>
+
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+var CTRL_NAME_UP 	= "Curtain Up";
+var CTRL_NAME_DOWN 	= "Curtain Down";
+
+function onExit(){
+        amiLoaded = false;
+        console.log("onExit called...");
+}
+
+window.onunload = onExit;
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+        amiLoaded = true;
+
+$("#radio-choice-1").click(function() {
+                doOpenAct();
+        });
+
+        $("#radio-choice-2").click(function() {
+                doPauseAct();
+        });
+
+        $("#radio-choice-3").click(function() {
+                doCloseAct();
+        });
+
+
+});
+
+var DELAY = 800;
+
+function doOpenAct(){
+		doOpenOff();
+
+        setTimeout(function(){
+        	doCloseOff();
+    	},DELAY);
+
+        setTimeout(function(){
+  		      doOpenOn();
+    	},2 * DELAY);
+
+}
+
+
+function doCloseAct(){
+   		doCloseOff();
+
+        setTimeout(function(){
+        	doOpenOff();
+    	},DELAY);
+
+        setTimeout(function(){
+	        doCloseOn();
+    	}, 2 * DELAY);
+}
+
+
+function doPauseAct(){
+   		doOpenOff();
+
+        setTimeout(function(){
+        	doCloseOff();
+    	},DELAY);
+}
+
+
+
+function doOpenOn(){
+	parent.changeStatus(CTRL_NAME_UP,'ff');
+}
+
+function doOpenOff(){
+	parent.changeStatus(CTRL_NAME_UP,'00');
+}
+
+
+function doCloseOn(){
+	parent.changeStatus(CTRL_NAME_DOWN,'ff');
+}
+
+
+
+function doCloseOff(){
+	parent.changeStatus(CTRL_NAME_DOWN,'00');
+}
+
+
+
+
+</script>
+</body>
+</html>
+
+

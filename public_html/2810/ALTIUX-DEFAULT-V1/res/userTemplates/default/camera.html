@@ -1,0 +1,137 @@
+<html>
+<head>
+	<title>Camera</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc37">
+	<meta name="resourceName" content="camera.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-camera:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+	<style>
+	.myimg {width:640px; height:auto;}
+	</style>
+</head>
+<body data-role="page" data-theme="a">
+<div data-role="header">
+	<h1>Camera</h1><h1>##FRIENDLY_NAME##</h1>
+</div>
+<center>
+<div data-role="fieldcontain">
+<table>
+    <tr>
+    <td>
+    	<img id="frameContainer" class="myimg" onload="loadImage()" onabort="loadImage()" onerror="loadImage()"/>
+    </td>
+	</tr>
+</table>
+</div>
+</center>
+<script type="text/javascript">
+
+var timer = null;
+var count = (new Date()).getTime();
+var viewUrl = null;
+var csrc  = "?type=j&channel=##UDN##&s=default&sid=";
+
+function loadImage()
+{
+	var el=document.getElementById("frameContainer");
+	el.src= viewUrl + csrc + count;
+	count = count + 1;
+
+	clearTimeout(timer);
+	timer = setTimeout(function() {
+	var el=document.getElementById("frameContainer");
+	el.src= viewUrl + csrc + count;
+	count = count + 1;
+	}, 500);
+}
+
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	clearTimeout(timer);
+	abortAll();
+	viewUrl = null;
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getView);
+}
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+	amiLoaded = true;
+	count = (new Date()).getTime();
+	viewUrl = null;
+	updateView();
+
+});
+
+
+
+var getView = null;
+
+function updateView()
+{
+	abort(getView);
+
+	getView = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getViewUrl",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getViewUrl xmlns:u=\"##SERVICE_TYPE##\"><argViewUrl></argViewUrl></u:getViewUrl>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argViewUrl').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			viewUrl = argName;
+			loadImage();
+		}
+	})
+	.error(function() {
+		//alert("error");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getView = null;
+	});
+}
+
+
+function aclick(){
+	window.location.href = '##SELF_URL##';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

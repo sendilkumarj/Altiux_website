@@ -1,0 +1,181 @@
+<html>
+<head>
+	<title>DRAPES Control</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc7">
+	<meta name="resourceName" content="drapes-toggle.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-drapes:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.0/jquery.mobile-1.0.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.6.4.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.0/jquery.mobile-1.0.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+<div data-role="header">
+	<h1>DRAPES</h1><h1>##FRIENDLY_NAME##</h1>
+</div>
+<center>
+<div data-role="fieldcontain">
+<table CELLSPACING=10>
+	<tr><td>&nbsp;</td></tr>
+    <tr><td>&nbsp;</td></tr>
+	<tr>
+    	<td align="center">
+    	<label>Operations</label>
+    	</td>
+    </tr>
+	<tr>
+		<td align="center">
+		<fieldset data-role="controlgroup" data-type="horizontal">
+				<input type="radio" name="radio-choice-1" id="radio-choice-1" value="1"  />
+				<label for="radio-choice-1">Open</label>
+
+				<input type="radio" name="radio-choice-1" id="radio-choice-2" value="2"  />
+				<label for="radio-choice-2">Pause</label>
+
+				<input type="radio" name="radio-choice-1" id="radio-choice-3" value="3"  />
+				<label for="radio-choice-3">Close</label>
+		</fieldset>
+		</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
+</table>
+</div>
+
+</center>
+
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(actPause);
+	abort(actOpen);
+	abort(actClose);
+}
+
+<!-- Initialization -->
+$(document).ready(function(){
+	amiLoaded = true;
+
+$("#radio-choice-1").click(function() {
+	  	doOpenAct();
+	});
+
+	$("#radio-choice-2").click(function() {
+	  	doPauseAct();
+	});
+
+	$("#radio-choice-3").click(function() {
+	  	doCloseAct();
+	});
+
+
+});
+
+
+
+var actOpen = null;
+
+function doOpenAct()
+{
+	actOpen = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actOpen",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actOpen xmlns:u=\"##SERVICE_TYPE##\"><argNew>128</argNew></u:actOpen>",
+	}).done(function( xml ) {
+
+	})
+	.error(function() {
+		//alert("error");
+	})
+	.complete(function() {
+		actOpen = null;
+		$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+	});
+}
+
+
+var actClose = null;
+
+function doCloseAct()
+{
+	actClose = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actClose",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actClose xmlns:u=\"##SERVICE_TYPE##\"><argNew>129</argNew></u:actClose>",
+	}).done(function( xml ) {
+
+	})
+	.error(function() {
+		//alert("error");
+	})
+	.complete(function() {
+		actClose = null;
+		$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+	});
+}
+
+
+var actPause = null;
+
+function doPauseAct()
+{
+	actPause = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actPause",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actPause xmlns:u=\"##SERVICE_TYPE##\"><argNew>130</argNew></u:actPause>",
+	}).done(function( xml ) {
+
+	})
+	.error(function() {
+		//alert("error");
+	})
+	.complete(function() {
+		actPause = null;
+		$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+	});
+}
+
+
+
+
+</script>
+</body>
+</html>

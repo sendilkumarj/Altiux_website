@@ -1,0 +1,99 @@
+
+/************** About ************/
+
+
+.home-initial-nav .selected a{
+    color: #03a6e8 !important;
+    cursor: default;
+}
+
+.about-headder {
+    background: url("../img/products-banner.png") 50% 50px no-repeat fixed #fff;
+    /* background-size: 100% 100%; */
+    height: 1200px;
+    position: absolute;
+    margin-top: 0px;
+    top: 0px;
+    left: 0;
+    width: 100%;
+}
+
+#home-carousel {
+    background: #eee;
+    min-height: 450px;
+    position: relative;
+    width: 100% !important;
+    /* min-width: 1000px; */
+    margin: 0;
+    padding: 0;
+    margin-top: -50px;
+    overflow: hidden;
+}
+
+.sectionp-bold {
+    font-size: 13pt !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+.navbar-default {
+    background-color: #000;
+    border-color: #e7e7e7;
+}
+
+.small-sech3 {
+    color: #a7a9ac !important;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px !important;
+}
+
+.small-secp {
+    font-size: 14px !important;
+    line-height: 20px !important;
+    padding: 0 10px;
+}
+
+.customer-first {
+    padding: 40px 0;
+}
+
+.customer-first .small-sech3 {
+    color: #fff !important;
+}
+
+.customer-first .small-secp {
+    color: #fff !important;
+}
+
+.founders-profile {
+    padding: 40px 0 0;
+}
+
+.founderh3 {
+    color: #000 !important;
+}
+
+.founder-role {
+    color: #03a6e8 !important;
+    min-height: 20px;
+    margin-bottom: 10px !important;
+}
+
+.founders-profile .small-secp {
+    color: #000 !important;
+}
+
+.founders-profile img {
+    width: 140px;
+}
+
+.sectionp-bold-black {
+    font-size: 13pt !important;
+    color: #000 !important;
+    font-weight: bold;
+}
+
+.section-icon {
+    padding-bottom: 20px;
+}

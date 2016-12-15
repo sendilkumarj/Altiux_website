@@ -1,0 +1,496 @@
+<html>
+<head>
+	<title>TV Control</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc18">
+	<meta name="resourceName" content="dvd-toggle.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-irdvd:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL## -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+
+<style>
+#power .ui-icon { background:  url(##IMAGE_URL##../icons/power.png) 50% 50% no-repeat; background-size: 24px 22px; }
+	#mute .ui-icon { background:  url(##IMAGE_URL##../icons/mute.png) 50% 50% no-repeat; background-size: 24px 22px; }
+	#play .ui-icon { background:  url(##IMAGE_URL##../icons/play.png) 50% 50% no-repeat; background-size: 24px 22px; }
+	#pause .ui-icon { background:  url(##IMAGE_URL##../icons/pause.jpg) 50% 50% no-repeat; background-size: 24px 22px; }
+	#stop .ui-icon { background:  url(##IMAGE_URL##../icons/stop.png) 50% 50% no-repeat; background-size: 24px 22px; }
+	#eject .ui-icon { background:  url(##IMAGE_URL##../icons/eject.png) 50% 50% no-repeat; background-size: 24px 22px; }
+</style>
+
+<div id="view" data-role="fieldcontain" style="border:2px solid #a1a1a1;background:#001111;">
+<div data-role="header">
+	<h1>DVD-BD Player</h1><h1>##FRIENDLY_NAME##</h1>
+</div>
+<center>
+<table>
+    <tr>
+    <td>
+	<label for="power">Power</label>
+	</td>
+	<td colspan="5">
+	<a href ="javascript:doActAuxPower()" data-role="button" data-icon="custom" id="power"/>Power</a>
+	</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+    <tr>
+    <td>
+	<label for="menu">Menu</label>
+	</td>
+	<td colspan="5">
+	<a href ="javascript:doActAuxMenu()" data-role="button" data-icon="grid" id="menu"/>Menu</a>
+	</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+			<label for="select">Select</label>
+		</td>
+		<tr>
+			<td></td>
+			<td></td>
+			<td>
+				<a href ="javascript:doActAuxUp()" data-role="button" data-icon="arrow-u" data-iconpos="notext" data-theme="a"></a>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<a href ="javascript:doActAuxLeft()" data-role="button" data-icon="arrow-l" data-iconpos="notext" data-theme="a"></a>
+			</td>
+			<td>
+				<a href ="javascript:doActAuxEnter()" data-role="button" data-icon="check" data-iconpos="notext" data-theme="a"></a>
+			</td>
+			<td>
+				<a href ="javascript:doActAuxRight()" data-role="button" data-icon="arrow-r" data-iconpos="notext" data-theme="a"/></a>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td></td>
+			<td>
+				<a href ="javascript:doActAuxDown()" data-role="button" data-icon="arrow-d" data-iconpos="notext" data-theme="a"/></a>
+			</td>
+		</tr>
+	</tr>
+    <tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+			<label for="ctrl">Control</label>
+		</td>
+		<td>
+			<a href ="javascript:doActAuxPlay()" data-role="button" data-icon="custom" data-iconpos="notext" data-theme="a" id="play"></a>
+		</td>
+		<td>
+			<a href ="javascript:doActAuxPause()" data-role="button" data-icon="custom" data-iconpos="notext" data-theme="a" id="pause"></a>
+		</td>
+		<td>
+			<a href ="javascript:doActAuxStop()" data-role="button" data-icon="custom" data-iconpos="notext" data-theme="a" id="stop"/></a>
+		</td>
+		<td>
+			<a href ="javascript:doActAuxEject()" data-role="button" data-icon="custom" data-iconpos="notext" data-theme="a" id="eject"/></a>
+		</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+</table>
+</center>
+</div>
+
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(actAuxPower);
+	abort(actAuxUp);
+	abort(actAuxLeft);
+	abort(actAuxEnter);
+	abort(actAuxRight);
+	abort(actAuxDown);
+	abort(actAuxPlay);
+	abort(actAuxPause);
+	abort(actAuxStop);
+	abort(actAuxEject);
+
+}
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+});
+
+
+
+
+var actAuxPower = null;
+
+function doActAuxPower()
+{
+	abort(actAuxPower);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actPower = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actTogPower",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actTogPower xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>0</argEmpty></u:actTogPower>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxPower = null;
+	});
+
+}
+
+
+
+var actAuxUp = null;
+
+function doActAuxUp()
+{
+	abort(actAuxUp);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxUp = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actUp",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actUp xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>5</argEmpty></u:actUp>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxUp = null;
+	});
+
+}
+
+
+
+var actAuxLeft = null;
+
+function doActAuxLeft()
+{
+	abort(actAuxLeft);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxLeft = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actLeft",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actLeft xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>8</argEmpty></u:actLeft>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxLeft = null;
+	});
+
+}
+
+
+
+
+var actAuxEnter = null;
+
+function doActAuxEnter()
+{
+	abort(actAuxEnter);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxEnter = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actSelectOk",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actSelectOk xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>9</argEmpty></u:actSelectOk>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxEnter = null;
+	});
+
+}
+
+
+
+
+var actAuxRight = null;
+
+function doActAuxRight()
+{
+	abort(actAuxRight);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxRight = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actRight",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actRight xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>6</argEmpty></u:actRight>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxRight = null;
+	});
+
+}
+
+
+
+var actAuxDown = null;
+
+function doActAuxDown()
+{
+	abort(actAuxDown);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxDown = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actDown",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actDown xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>7</argEmpty></u:actDown>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxDown = null;
+	});
+
+}
+
+
+
+
+var actAuxPlay = null;
+
+function doActAuxPlay()
+{
+	abort(actAuxPlay);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxPlay = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actPlay",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actPlay xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>1</argEmpty></u:actPlay>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxPlay = null;
+	});
+
+}
+
+
+
+
+var actAuxStop = null;
+
+function doActAuxStop()
+{
+	abort(actAuxStop);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxStop = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actStop",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actStop xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>3</argEmpty></u:actStop>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxStop = null;
+	});
+
+}
+
+
+var actAuxPause = null;
+
+function doActAuxPause()
+{
+	abort(actAuxPause);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxPause = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actPause",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actPause xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>2</argEmpty></u:actPause>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxPause = null;
+	});
+
+}
+
+var actAuxEject = null;
+
+function doActAuxEject()
+{
+	abort(actAuxEject);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxEject = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actEject",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actEject xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>4</argEmpty></u:actEject>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxEject = null;
+	});
+
+}
+
+
+
+
+var actAuxMenu = null;
+
+function doActAuxMenu()
+{
+	abort(actAuxMenu);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actAuxMenu = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actMenu",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actMenu xmlns:u=\"##SERVICE_TYPE##\"><argEmpty>14</argEmpty></u:actMenu>",
+	}).done(function( xml ) {
+		$("#content").empty().html('');
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actAuxMenu = null;
+	});
+
+}
+
+
+
+
+</script>
+</body>
+</html>

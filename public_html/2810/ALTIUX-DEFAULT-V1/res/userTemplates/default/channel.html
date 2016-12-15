@@ -1,0 +1,406 @@
+<html>
+<head>
+	<title>Channels</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc1">
+	<meta name="resourceName" content="channel.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:info-service-channel:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+	<link rel="stylesheet" type="text/css" media="all" href="##COMMON_URL##jqueryui/1.8.2/themes/ui-darkness/jquery-ui.css"/>
+	</script>
+				<!--
+				#infocontainer
+				{
+					width:900px;
+	    			overflow-x: scroll;
+	    			overflow-y: hidden;
+	    			padding-bottom:10px;
+	    			white-space: nowrap;
+	    			scrollbar-base-color:#ffeaff
+	    		}
+	    		-->
+
+	<style type="text/css" media="screen">
+
+			#infocontainer ul
+			{
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+				text-align: center;
+			}
+
+			#infocontainer ul li { display: inline; }
+
+			#infocontainer ul li a
+			{
+				text-decoration: none;
+				padding: .2em 1em;
+			}
+
+			#infocontainer ul li a:hover
+			{
+				color: #fff;
+				background-color: #369;
+			}
+
+			#infocontainer { margin-bottom: 1em;} /* just to move code away from list example - not needed for list */
+
+
+	</style>
+</head>
+<body data-role="page" data-theme="a">
+<div data-role="header">
+	<h1>Channels</h1>
+</div>
+<center>
+</br>
+<div id="infocontainer"></div>
+<div id="control" style="margin-left:auto; margin-right:auto;"></div>
+<div id="seldesc" style="margin-left:auto; margin-right:auto;"></div>
+</center>
+<script type="text/javascript">
+
+
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getList);
+	abort(actPlay);
+	abort(actStop);
+	abort(actGetSessions);
+	abort(actGetChannelInfo);
+}
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+	console.log("");
+	console.log("calling doGetListAct...");
+	doGetListAct();
+	console.log("called doGetListAct...");
+	amiLoaded = true;
+	var refreshId = setInterval(function()
+	{
+		if(amiLoaded){
+			doStatus();
+		}
+	}, 5000);
+
+	doGetSessions(false);
+
+});
+
+
+function doStatus()
+{
+	doGetSessions(false);
+}
+
+
+
+var getList = null;
+
+function doGetListAct()
+{
+	abort(getList);
+
+	getList = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetChannelList",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetChannelList xmlns:u=\"##SERVICE_TYPE##\"></u:actGetChannelList>",
+	}).done(function( xml ) {
+		//process category id list
+		//var xml = "<actGetChannelList><channel><id>1</id><name>SubItem1</name><desc></desc><iconUrl>http://www.bindayak.com/index_files/image002.jpg</iconUrl><locationUrl>http://www.bindayak.com/index_files/image002.jpg</locationUrl></channel><channel><id>2</id><name>SubItem2</name><desc></desc><iconUrl>http://www.bindayak.com/index_files/image002.jpg</iconUrl><locationUrl>http://www.bindayak.com/index_files/image002.jpg</locationUrl></channel><channel><id>3</id><name>SubItem3</name><desc></desc><iconUrl>http://www.bindayak.com/index_files/image002.jpg</iconUrl><locationUrl>http://www.bindayak.com/index_files/image002.jpg</locationUrl></channel></actGetChannelList>";
+		//alert( "Parsing:" + xml);
+
+		var __Id 		= "";
+		var _name 		= "";
+		var _desc 		= "";
+		var _icon 		= "";
+
+		var _lisHtml	= "<ul>";
+
+		$(xml).find('channel').each(function(){
+			__Id 		= $(this).find('id').text();
+			_name 		= $(this).find('name').text();
+			_desc 		= $(this).find('desc').text();
+			_icon 		= $(this).find('iconUrl').text();
+			_mime		= $(this).find('mimeType').text();
+			_lisHtml 	= _lisHtml + "<li><span><a href=\"javascript:playChannel(" + "\'" + __Id + "\'," +  "\'" + _name + "\'," + "\'" + _desc + "\')\" title=\'"+ _name + "\'>" + "<img title=\'"+ _name  + "\' style=\'width:75;height:75;border:0\' id='base64image' src='data:" + _mime + ";base64," + _icon + "\'>"  + "</a></span></li>";
+		});
+
+		_lisHtml 	= _lisHtml + "</ul>";
+		console.log(_lisHtml);
+
+		$("#infocontainer").html(_lisHtml);
+
+		console.log("Updated");
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getList = null;
+	});
+
+}
+
+
+
+
+function playChannel(id, __name, desc)
+{
+	//alert(id);
+	//alert(desc);
+	var _descHtml = "<p width=\"640\" height=\"480\"><b>"+ __name + "<\/b><\/br>" + desc + "<\/p>";
+	$("#seldesc").html(_descHtml);
+	doGetSessions(true);//stop all sessions
+	doSetPlayonRemoteAct(id);//start new session
+}
+
+
+
+var actPlay = null;
+
+function doSetPlayonRemoteAct(id)
+{
+
+	abort(actPlay);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actPlayOnRemote = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actPlayOnRemote",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actPlayOnRemote xmlns:u=\"##SERVICE_TYPE##\"><argCrId>" + id + "</argCrId></u:actPlayOnRemote>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('Status').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			if(argName == 'PASS')
+			{
+				doGetSessions(false);
+			}
+		}
+
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actPlayOnRemote = null;
+	});
+
+}
+
+
+
+var actStop = null;
+
+function doSetStoponRemoteAct(id)
+{
+	abort(actStop);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actStopOnRemote = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actStopOnRemote",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actStopOnRemote xmlns:u=\"##SERVICE_TYPE##\"><argSession>" + id + "</argSession></u:actStopOnRemote>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('Status').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			if(argName == 'PASS'){
+				//doGetSessions();
+			}
+		}
+
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actStopOnRemote = null;
+	});
+
+}
+
+
+
+var actGetSessions = null;
+
+function doGetSessions(isStop)
+{
+	abort(actGetSessions);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actStopOnRemote = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetSession",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetSession xmlns:u=\"##SERVICE_TYPE##\"><argSession></argSession></u:actGetSession>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('Status').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			var __ChId 		= "";
+			var __SesId		= "";
+
+			$(xml).find('session').each(function(){
+				__ChId 		= $(this).find('crid').text();
+				__SesId		= $(this).find('url').text();
+				if(isStop)
+				{
+					doSetStoponRemoteAct(__SesId);
+				}
+				else //update only
+				{
+					doGetChannelInfo(__ChId);
+				}
+
+			});
+
+			_lisHtml 	= _lisHtml + "</ul>";
+			console.log(_lisHtml);
+
+			$("#infocontainer").html(_lisHtml);
+
+			console.log("Updated");
+
+		}
+
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actGetSessions = null;
+	});
+
+}
+
+
+
+
+
+var actGetChannelInfo = null;
+
+function doGetChannelInfo(id)
+{
+	abort(actGetChannelInfo);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actStopOnRemote = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetMetaData",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetMetaData xmlns:u=\"##SERVICE_TYPE##\"><argCrId>" + id + "</argCrId></u:actGetMetaData>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('MetaData').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			var __ChId 		= "";
+			var __SesId		= "";
+
+			$(xml).find('metaData').each(function(){
+				__Id 		= $(this).find('id').text();
+				__name		= $(this).find('name').text();
+				__desc		= $(this).find('desc').text();
+				__icon		= $(this).find('iconUrl').text();
+
+				var _descHtml = "<p width=\"640\" height=\"480\"><b>"+ __name + "<\/b><\/br>" + __desc + "<\/p>";
+				$("#seldesc").html(_descHtml);
+			});
+
+		}
+
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actGetChannelInfo = null;
+	});
+
+}
+
+
+
+
+function aclick(){
+	window.location.href = '##SELF_URL##';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

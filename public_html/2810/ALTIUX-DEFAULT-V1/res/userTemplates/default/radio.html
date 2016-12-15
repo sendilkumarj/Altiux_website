@@ -1,0 +1,178 @@
+<html>
+<head>
+	<title>RADIO</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc26">
+	<meta name="resourceName" content="radio.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:info-service-radio:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+				<!--
+				#infocontainer
+				{
+					width:900px;
+	    			overflow-x: scroll;
+	    			overflow-y: hidden;
+	    			padding-bottom:10px;
+	    			white-space: nowrap;
+	    			scrollbar-base-color:#ffeaff
+	    		}
+	    		-->
+
+	<style type="text/css" media="screen">
+
+			#infocontainer ul
+			{
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+				text-align: center;
+			}
+
+			#infocontainer ul li { display: inline; }
+
+			#infocontainer ul li a
+			{
+				text-decoration: none;
+				padding: .2em 1em;
+			}
+
+			#infocontainer ul li a:hover
+			{
+				color: #fff;
+				background-color: #369;
+			}
+
+			#infocontainer { margin-bottom: 1em;} /* just to move code away from list example - not needed for list */
+
+
+	</style>
+</head>
+<body data-role="page" data-theme="a">
+
+<div data-role="header">
+	<h1>Radio</h1>
+</div>
+<center>
+</br>
+
+<div id="infocontainer"></div>
+</center>
+<script type="text/javascript">
+
+
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getList);
+}
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+	console.log("");
+	$("#file").hide();
+	console.log("calling doGetListAct...");
+	doGetListAct();
+	console.log("called doGetListAct...");
+	amiLoaded = true;
+});
+
+
+
+var getList = null;
+
+function doGetListAct()
+{
+	abort(getList);
+
+	getList = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetRadioAppList",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetRadioAppList xmlns:u=\"##SERVICE_TYPE##\"></u:actGetRadioAppList>",
+	}).done(function( xml ) {
+		//process category id list
+		//var xml = "<actGetRadioAppList><radio><id>1</id><name>SubItem1</name><desc></desc><iconUrl>http://www.bindayak.com/index_files/image002.jpg</iconUrl><locationUrl>http://www.bindayak.com/index_files/image002.jpg</locationUrl></radio><radio><id>2</id><name>SubItem2</name><desc></desc><iconUrl>http://www.bindayak.com/index_files/image002.jpg</iconUrl><locationUrl>http://www.bindayak.com/index_files/image002.jpg</locationUrl></radio><radio><id>3</id><name>SubItem3</name><desc></desc><iconUrl>http://www.bindayak.com/index_files/image002.jpg</iconUrl><locationUrl>http://www.bindayak.com/index_files/image002.jpg</locationUrl></radio></actGetRadioAppList>";
+		//alert( "Parsing:" + xml);
+
+		var __Id 		= "";
+		var _name 		= "";
+		var _desc 		= "";
+		var _icon 		= "";
+		var _url 		= "";
+
+		var _lisHtml	= "<ul>";
+
+		$(xml).find('radio').each(function(){
+			__Id 		= $(this).find('id').text();
+			_name 		= $(this).find('name').text();
+			_icon 		= $(this).find('iconUrl').text();
+			_url 		= $(this).find('locationUrl').text();
+			_mime		= $(this).find('mimeType').text();
+			_lisHtml 	= _lisHtml + "<li><span><a href=\"javascript:renderInfo(" + "\'" + _url + "\')\" title=\'"+ _name + "\'>" + "<img title=\'"+ _name  + "\' style=\'width:75;height:75;border:0\' id='base64image' src='data:" + _mime + ";base64," + _icon + "\'>"  + "</a></span></li>";
+		});
+
+		_lisHtml 	= _lisHtml + "</ul>";
+		console.log(_lisHtml);
+
+		$("#infocontainer").html(_lisHtml);
+
+		console.log("Updated");
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getList = null;
+	});
+
+}
+
+
+function renderInfo(url)
+{
+	//alert(url);
+	parent.showframe.location.href = "ext.html?u=" + url;
+
+}
+
+
+
+function aclick(){
+	window.location.href = '##SELF_URL##';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

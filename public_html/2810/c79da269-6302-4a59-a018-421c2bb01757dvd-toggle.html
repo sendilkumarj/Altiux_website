@@ -1,0 +1,174 @@
+<html>
+<head>
+	<title>TV Control</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc19">
+	<meta name="resourceName" content="dvd-toggle.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-irdvd:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ./ALTIUX-DEFAULT-V1/res/common/ -->
+	<link rel="stylesheet" href="./ALTIUX-DEFAULT-V1/res/common/jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="./ALTIUX-DEFAULT-V1/res/common/jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="./ALTIUX-DEFAULT-V1/res/common/jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+
+<style>
+	#power .ui-icon { background:  url(./ALTIUX-DEFAULT-V1/res/userTemplates/default/images/../icons/power.png) 50% 50% no-repeat; background-size: 24px 22px; }
+	#mute .ui-icon { background:  url(./ALTIUX-DEFAULT-V1/res/userTemplates/default/images/../icons/mute.png) 50% 50% no-repeat; background-size: 24px 22px; }
+	#play .ui-icon { background:  url(./ALTIUX-DEFAULT-V1/res/userTemplates/default/images/../icons/play.png) 50% 50% no-repeat; background-size: 24px 22px; }
+	#pause .ui-icon { background:  url(./ALTIUX-DEFAULT-V1/res/userTemplates/default/images/../icons/pause.jpg) 50% 50% no-repeat; background-size: 24px 22px; }
+	#stop .ui-icon { background:  url(./ALTIUX-DEFAULT-V1/res/userTemplates/default/images/../icons/stop.png) 50% 50% no-repeat; background-size: 24px 22px; }
+	#eject .ui-icon { background:  url(./ALTIUX-DEFAULT-V1/res/userTemplates/default/images/../icons/eject.png) 50% 50% no-repeat; background-size: 24px 22px; }
+</style>
+
+<div id="view" data-role="fieldcontain" style="border:2px solid #a1a1a1;background:#001111;">
+<div data-role="header">
+	<h1>DVD-BD Player</h1><h1>DVD Player</h1>
+</div>
+<center>
+<table>
+    <tr>
+    <td>
+	<label for="power">Power</label>
+	</td>
+	<td colspan="5">
+	<a href ="javascript:doActAuxPower()" data-role="button" data-icon="custom" id="power"/>Power</a>
+	</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+    <tr>
+    <td>
+	<label for="menu">Menu</label>
+	</td>
+	<td colspan="5">
+	<a href ="javascript:doActAuxMenu()" data-role="button" data-icon="grid" id="menu"/>Menu</a>
+	</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+			<label for="select">Select</label>
+		</td>
+		<tr>
+			<td></td>
+			<td></td>
+			<td>
+				<a href ="javascript:doActAuxUp()" data-role="button" data-icon="arrow-u" data-iconpos="notext" data-theme="a"></a>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<a href ="javascript:doActAuxLeft()" data-role="button" data-icon="arrow-l" data-iconpos="notext" data-theme="a"></a>
+			</td>
+			<td>
+				<a href ="javascript:doActAuxEnter()" data-role="button" data-icon="check" data-iconpos="notext" data-theme="a"></a>
+			</td>
+			<td>
+				<a href ="javascript:doActAuxRight()" data-role="button" data-icon="arrow-r" data-iconpos="notext" data-theme="a"/></a>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td></td>
+			<td>
+				<a href ="javascript:doActAuxDown()" data-role="button" data-icon="arrow-d" data-iconpos="notext" data-theme="a"/></a>
+			</td>
+		</tr>
+	</tr>
+    <tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+			<label for="ctrl">Control</label>
+		</td>
+		<td>
+			<a href ="javascript:doActAuxPlay()" data-role="button" data-icon="custom" data-iconpos="notext" data-theme="a" id="play"></a>
+		</td>
+		<td>
+			<a href ="javascript:doActAuxPause()" data-role="button" data-icon="custom" data-iconpos="notext" data-theme="a" id="pause"></a>
+		</td>
+		<td>
+			<a href ="javascript:doActAuxStop()" data-role="button" data-icon="custom" data-iconpos="notext" data-theme="a" id="stop"/></a>
+		</td>
+		<td>
+			<a href ="javascript:doActAuxEject()" data-role="button" data-icon="custom" data-iconpos="notext" data-theme="a" id="eject"/></a>
+		</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+</table>
+</center>
+</div>
+
+
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+var CTRL_NAME 	= "DVD";
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+}
+
+window.onunload = onExit;
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+    amiLoaded = true;
+});
+
+
+function doActAuxPower(){
+	parent.changeStatus(CTRL_NAME,'00');
+}
+
+function doActAuxUp(){
+	parent.changeStatus(CTRL_NAME,'05');
+}
+
+function doActAuxLeft(){
+	parent.changeStatus(CTRL_NAME,'08');
+}
+
+
+function doActAuxEnter(){
+	parent.changeStatus(CTRL_NAME,'09');
+}
+
+
+function doActAuxRight(){
+	parent.changeStatus(CTRL_NAME,'06');
+}
+
+function doActAuxDown(){
+	parent.changeStatus(CTRL_NAME,'07');
+}
+
+function doActAuxPlay(){
+	parent.changeStatus(CTRL_NAME,'01');
+}
+
+function doActAuxStop(){
+	parent.changeStatus(CTRL_NAME,'03');
+}
+
+function doActAuxPause(){
+	parent.changeStatus(CTRL_NAME,'02');
+}
+
+function doActAuxEject(){
+	parent.changeStatus(CTRL_NAME,'04');
+}
+
+function doActAuxMenu(){
+	parent.changeStatus(CTRL_NAME,'0E');
+}
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,390 @@
+<html>
+<head>
+	<title>SENSORS</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc32">
+	<meta name="resourceName" content="senso.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-sensor:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- http://ecg.pdevice.dnsget.org:8080/intTest/common/jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+<style>
+.ui-input-text {
+    width:20% !important;
+    }
+
+</style>
+</head>
+<body data-role="page" data-theme="a">
+<div data-role="header">
+	<h1>Sensors</h1>
+</div>
+
+<center>
+##NEWSENSOR##
+</center>
+
+
+
+<script type="text/javascript">
+
+
+var amiLoaded = false;
+var updateFreqInMilliSec = 10000;
+var refreshId;
+var mfDay = "00";
+var mfMon = "00";
+var mfYear = "0000";
+var mfHour = "00";
+var mfMin = "00";
+var mfSec = "00";
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(actPower);
+	abort(getPower);
+	abort(getDateMsb);
+	abort(getDateLsb);
+	abort(getTime);
+	abort(getVoltage);
+	abort(getTotalKwh);
+
+}
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+	$("#mswitch").bind( "change", function(event, ui) {
+	  console.log("" + $("#mswitch").val());
+	  processSwitch($("#mswitch").val())
+	});
+
+	amiLoaded = true;
+
+	doStatus();
+});
+
+
+
+function doStatus(){
+	//need to stop because depending upon the network speed the update might take more time than the update frequency
+	clearInterval(refreshId);
+	if(amiLoaded){
+		//Implement the logic for updating the status of all the devices here
+		console.log("###Updating the status###...");
+		processUpdate(0,iterateNextUpdate);
+	}
+}
+
+
+function processUpdate(i,callback){
+	switch(i){
+		case 0:{
+			getSwitchStatus(i,callback);
+			break;
+		}
+		/*
+		case 1:{
+			getDateMsbStatus(i,callback);
+			break;
+		}
+		case 2:{
+			getDateLsbStatus(i,callback);
+			break;
+		}
+		case 3:{
+			getTimeStatus(i,callback);
+			break;
+		}
+		case 4:{
+			getVoltageStatus(i,callback);
+			break;
+		}
+		case 5:{
+			getKwhStatus(i,callback);
+			break;
+		}
+		*/
+		default:
+			if (callback && typeof(callback) === "function") {
+				callback(i);
+			}
+	}
+}
+
+
+function iterateNextUpdate(i){
+	if(amiLoaded){
+		++i;
+		if(i < 6){
+			processUpdate(i,iterateNextUpdate);
+		}else{
+			$("#date").val(mfDay + "/" + mfMon + "/" + mfYear + " " + mfHour + ":" + mfMin + ":" + mfSec);
+			//Start the interval again
+			refreshId = setInterval(function(){
+					doStatus();
+			}, updateFreqInMilliSec);
+		}
+	}
+}
+
+
+var actPower = null;
+
+function processSwitch(mswitchVal)
+{
+	abort(actPower);
+	actPower = $.ajax({
+	  type: "POST",
+	  url: "http://54.254.154.151:7878/6264775A09BF9AED20DF6E4135017A5FFDA016EEADD0/PDEVPDEVICE7PDI80120002/sip:PDEVADVT4PDI90120040@pdevice.com/151/ras-service-hvac/actSetTemp",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actSetTemp xmlns:u=\"urn:schemas-p-device-com:service:ras-service-hvac:1\"><argNewOn>" + mswitchVal + "</argNewOn></u:actSetTemp>",
+	}).done(function( xml ) {
+
+	})
+	.error(function() {
+	})
+	.complete(function() {
+		actPower = null;
+	});
+}
+
+
+var getPower = null;
+
+function getSwitchStatus(i, callback){
+	abort(getPower);
+	$.ajax({
+	  type: "POST",
+	  url: "http://54.254.154.151:7878/6264775A09BF9AED20DF6E4135017A5FFDA016EEADD0/PDEVPDEVICE7PDI80120002/sip:PDEVADVT4PDI90120040@pdevice.com/151/ras-service-hvac/" + "getTemp",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getTemp xmlns:u=\"" + "urn:schemas-p-device-com:service:ras-service-hvac:1" + "\"><argTemp></argTemp></u:getTemp>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argTemp').text();
+		if(argName){
+			//alert( "Status Response Received:" + argName );
+			console.log("STATUS UPDATED:DEVICE NAME: SWITCH:" + argName);
+			if(argName == "1"){
+				$("#mswitch").val("2");
+			}else{
+				$("#mswitch").val("1");
+			}
+		}
+	})
+	.error(function() {
+		console.log("STATUS UPDATE FAILED:DEVICE NAME: SWITCH");
+	})
+	.complete(function() {
+		console.log("STATUS UPDATE COMLETED:DEVICE NAME: SWITCH");
+		if (callback && typeof(callback) === "function") {
+		    callback(i);
+    	}
+    	getPower = null;
+	});
+}
+
+
+
+
+var getDateMsb = null;
+
+function getDateMsbStatus(i, callback){
+	abort(getDateMsb);
+	$.ajax({
+	  type: "POST",
+	  url: "http://54.254.154.151:7878/6264775A09BF9AED20DF6E4135017A5FFDA016EEADD0/PDEVPDEVICE7PDI80120002/sip:PDEVADVT4PDI90120040@pdevice.com/1/ras-service-lighting/" + "getLampUsage",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getLampUsage xmlns:u=\"" + "urn:schemas-p-device-com:service:ras-service-lighting:1" + "\"><argLampUsage></argLampUsage></u:getLampUsage>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argLampUsage').text();
+		if(argName){
+			//alert( "Status Response Received:" + argName );
+			console.log("STATUS UPDATED:DEVICE NAME: DATE MSB:" + argName);
+			//CONVERT INTO INT AND THEN SHIFT
+			var intVal = parseInt(argName);
+			mfDay = "" + (intVal >>> 8);
+			mfMon = "" + (intVal & 255);
+		}
+	})
+	.error(function() {
+		console.log("STATUS UPDATE FAILED:DEVICE NAME: DATE MSB");
+	})
+	.complete(function() {
+		console.log("STATUS UPDATE COMLETED:DEVICE NAME: DATE MSB");
+		if (callback && typeof(callback) === "function") {
+		    callback(i);
+    	}
+    	getDateMsb = null;
+	});
+}
+
+
+
+
+
+var getDateLsb = null;
+
+function getDateLsbStatus(i, callback){
+	abort(getDateLsb);
+	$.ajax({
+	  type: "POST",
+	  url: "http://54.254.154.151:7878/6264775A09BF9AED20DF6E4135017A5FFDA016EEADD0/PDEVPDEVICE7PDI80120002/sip:PDEVADVT4PDI90120040@pdevice.com/1/ras-service-occupancy/" + "getLocation",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getLocation xmlns:u=\"" + "urn:schemas-p-device-com:service:ras-service-occupancy:1" + "\"><argLocationX></argLocationX></u:getLocation>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argLocationX').text();
+		if(argName){
+			//alert( "Status Response Received:" + argName );
+			console.log("STATUS UPDATED:DEVICE NAME: DATE LSB:" + argName);
+			var intVal = parseInt(argName);
+			mfYear = "" + (intVal >>> 8);
+			mfHour = "" + (intVal & 255);
+		}
+	})
+	.error(function() {
+		console.log("STATUS UPDATE FAILED:DEVICE NAME: DATE LSB");
+	})
+	.complete(function() {
+		console.log("STATUS UPDATE COMLETED:DEVICE NAME: DATE LSB");
+		if (callback && typeof(callback) === "function") {
+		    callback(i);
+    	}
+    	getDateLsb = null;
+	});
+}
+
+
+
+var getTime = null;
+
+function getTimeStatus(i, callback){
+	abort(getTime);
+	$.ajax({
+	  type: "POST",
+	  url: "http://54.254.154.151:7878/6264775A09BF9AED20DF6E4135017A5FFDA016EEADD0/PDEVPDEVICE7PDI80120002/sip:PDEVADVT4PDI90120040@pdevice.com/1/ras-service-tvi/" + "getChannel",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getChannel xmlns:u=\"" + "urn:schemas-p-device-com:service:ras-service-tvi:1" + "\"><argChannel></argChannel></u:getChannel>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argChannel').text();
+		if(argName){
+			//alert( "Status Response Received:" + argName );
+			console.log("STATUS UPDATED:DEVICE NAME: TIME:" + argName);
+			//CONVERT INTO INT AND THEN SHIFT
+			var intVal = parseInt(argName);
+			mfMin = "" + (intVal >>> 8);
+			mfSec = "" + (intVal & 255);
+		}
+	})
+	.error(function() {
+		console.log("STATUS UPDATE FAILED:DEVICE NAME: TIME");
+	})
+	.complete(function() {
+		console.log("STATUS UPDATE COMLETED:DEVICE NAME: TIME");
+		if (callback && typeof(callback) === "function") {
+		    callback(i);
+    	}
+    	getTime = null;
+	});
+}
+
+var getVoltage = null;
+
+function getVoltageStatus(i, callback){
+	abort(getVoltage);
+	$.ajax({
+	  type: "POST",
+	  url: "http://54.254.154.151:7878/6264775A09BF9AED20DF6E4135017A5FFDA016EEADD0/PDEVPDEVICE7PDI80120002/sip:PDEVADVT4PDI90120040@pdevice.com/1/ras-service-hvac/" + "getFanRunTime",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getFanRunTime xmlns:u=\"" + "urn:schemas-p-device-com:service:ras-service-hvac:1" + "\"><argFanRunTime></argFanRunTime></u:getFanRunTime>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argFanRunTime').text();
+		if(argName){
+			//alert( "Status Response Received:" + argName );
+			console.log("STATUS UPDATED:DEVICE NAME: VOLTAGE:" + argName);
+			var volt = parseInt(argName);
+			volt = volt/100;
+			$("#voltage").val("" + volt).refresh();
+		}
+	})
+	.error(function() {
+		console.log("STATUS UPDATE FAILED:DEVICE NAME: VOLTAGE");
+	})
+	.complete(function() {
+		console.log("STATUS UPDATE COMLETED:DEVICE NAME: VOLTAGE");
+		if (callback && typeof(callback) === "function") {
+		    callback(i);
+    	}
+    	getVoltage = null;
+	});
+}
+
+
+var getTotalKwh = null;
+
+function getKwhStatus(i, callback){
+	abort(getTotalKwh);
+	$.ajax({
+	  type: "POST",
+	  url: "http://54.254.154.151:7878/6264775A09BF9AED20DF6E4135017A5FFDA016EEADD0/PDEVPDEVICE7PDI80120002/sip:PDEVADVT4PDI90120040@pdevice.com/1/ras-service-hvac/" + "getCOLevel",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getCOLevel xmlns:u=\"" + "urn:schemas-p-device-com:service:ras-service-hvac:1" + "\"><argCOLevel></argCOLevel></u:getCOLevel>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argCOLevel').text();
+		if(argName){
+			console.log("STATUS UPDATED:DEVICE NAME: KWH:" + argName);
+			var volt = parseInt(argName);
+			volt = volt/100;
+			$("#kwh").val("" + volt).refresh();
+		}
+	})
+	.error(function() {
+		console.log("STATUS UPDATE FAILED:DEVICE NAME: KWH");
+	})
+	.complete(function() {
+		console.log("STATUS UPDATE COMLETED:DEVICE NAME: KWH");
+		if (callback && typeof(callback) === "function") {
+		    callback(i);
+    	}
+    	getTotalKwh = null;
+	});
+}
+
+
+</script>
+</body>
+</html>

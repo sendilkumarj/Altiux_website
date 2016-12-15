@@ -1,0 +1,345 @@
+<html>
+<!-- <body style="background-color:#A1A1BD"> -->
+<head>
+	<base target ="showframe" />
+	<title>Details</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc24">
+	<meta name="resourceName" content="detail.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="DETAIL">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+	<link rel="stylesheet" type="text/css" media="all" href="##COMMON_URL##jqueryui/1.8.2/themes/ui-darkness/jquery-ui.css"/>
+</head>
+<body id="mybody" data-role="page" data-theme="a">
+<div id="ticker" style="height:100%;width:90%;float:left;padding:0;"></div>
+<div id="tickerctrl" style="height:100%;width:10%;float:left;">
+	<table>
+		<tr>
+			<td colspan="5">
+				<a href="javascript:;"><span id="prev" class="ui-icon ui-icon-seek-prev"></span></a>
+			</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td colspan="5">
+				<a href="javascript:;"><span id="playpause" class="ui-icon ui-icon-pause"></span></a>
+			</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td colspan="5">
+				<a href="javascript:;"><span id="next" class="ui-icon ui-icon-seek-next"></span></a>
+			</td>
+		</tr>
+	</table>
+</div>
+<script type="text/javascript">
+
+var timer = null;
+
+var refreshTimer = 500000;
+var tickerTimer = 5000;
+
+$(document).ready(function()
+{
+	doStatus();
+	createTicker();
+	$('#ticker a').attr('target', 'showframe');
+
+	var refreshId = setInterval(function()
+	{
+		 doStatus();
+	}, refreshTimer);
+
+});
+
+
+function doStatus()
+{
+	updateTicker();
+}
+
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getTickerList);
+}
+
+
+
+var getTickerList = null;
+
+function updateTicker()
+{
+	abort(getTickerList);
+
+	console.log("doing post actGetRSSList...");
+
+	tickerItems = new Array();
+	tickerItems = [];
+	tickerItems.length = 0;
+
+	getTickerList = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetRSSList",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetRSSList xmlns:u=\"##SERVICE_TYPE##\"></u:actGetRSSList>",
+	}).done(function( xml ) {
+		//process category id list
+		//var xml = "<argCatInfoList><catId><id>1</id><name>A</name></catId><catId><id>2</id><name>B</name></catId><catId><id>3</id><name>C</name></catId></argCatInfoList>";
+		//alert( "Parsing:" + xml);
+
+		var _catId 		= "";
+		var _catLocUrl 	= "";
+
+		$(xml).find('rss').each(function(){
+			_catId 		= $(this).find('id').text();
+			_catLocUrl 	= $(this).find('locationUrl').text();
+			doActGetInfo(_catId,_catLocUrl);
+		});
+
+		console.log("UPDATED RSS CONTENTS:"+ tickerItems.length);
+
+		i = 0;
+
+	})
+	.error(function() {
+		console.log("error actGetRSSList...");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		console.log("completed actGetRSSList...");
+		getTickerList = null;
+	});
+
+}
+
+
+function handlePageClicks(_link){
+	//var _link = $(this).getElementByName('a').href;
+	//alert("Reaching here..:"+_link);
+	//parent.showframe.location.href = _link;
+	parent.showframe.location.href = "ext.html?u=" + _link;
+	return false;
+}
+
+
+
+function doActGetInfo(_catId,_catLocUrl)
+{
+	$.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetRSSContent",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetRSSContent xmlns:u=\"##SERVICE_TYPE##\"><argRSSId>" + _catId + "</argRSSId><argRSSUrl>" + _catLocUrl + "</argRSSUrl></u:actGetRSSContent>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argRssResponse').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			console.log(argName);
+			$(xml).find('feed').each(function(){
+				var _info 		= $(this);
+				var _feedNode 	= _info[0].childNodes[0];
+				var _link 		= "" + _feedNode.getAttribute('href');
+				var linkFunc = 'return handlePageClicks(\'' + _link + '\')';
+				_feedNode.setAttribute('onclick',linkFunc);
+				var _feedHtml	= (new XMLSerializer()).serializeToString(_feedNode);
+				console.log(_feedNode);
+				console.log(_feedHtml);
+				tickerItems.push(_feedHtml);
+			});
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+	});
+
+}
+
+
+
+$('#prev').click(function() {
+	//alert("prev");
+	if(null != timer){
+		clearTimeout(timer);
+		timer = null;
+		$('#playpause').removeClass('ui-icon ui-icon-pause');
+		$('#playpause').addClass('ui-icon ui-icon-play');
+	}
+
+	$('#ticker').fadeOut("fast", function(){
+		i--;
+
+		if( i < 0 ){
+			i = tickerItems.length - 1;
+    	}
+
+		$(this).html(tickerItems[i]).fadeIn("slow");
+
+	});
+
+});
+
+
+$('#next').click(function() {
+	//alert("next");
+	if(null != timer){
+		clearTimeout(timer);
+		timer = null;
+		$('#playpause').removeClass('ui-icon ui-icon-pause');
+		$('#playpause').addClass('ui-icon ui-icon-play');
+	}
+
+	$('#ticker').fadeOut("fast", function(){
+		i++;
+
+		if( i >= tickerItems.length){
+			i = 0;
+    	}
+
+		$(this).html(tickerItems[i]).fadeIn("slow");
+
+	});
+
+});
+
+
+
+function handlePlayPause(){
+
+	if(null != timer){
+		clearTimeout(timer);
+		timer = null;
+		$('#playpause').removeClass('ui-icon ui-icon-pause');
+		$('#playpause').addClass('ui-icon ui-icon-play');
+	}
+	else{
+		i++;
+		$('#playpause').removeClass('ui-icon ui-icon-play');
+		$('#playpause').addClass('ui-icon ui-icon-pause');
+		timer = setTimeout("tickerIt()", tickerTimer);
+	}
+}
+
+$('#playpause').click(function() {
+	//alert("playpause");
+	handlePlayPause();
+
+});
+
+
+$('#mybody').touchstart(function() {
+	handlePlayPause();
+});
+
+$('#mybody').touchend(function() {
+	handlePlayPause();
+});
+
+
+/*
+$('#ticker').hover(
+  function () {
+     clearTimeout(timer);
+     timer = null;
+  },
+  function () {
+    timer = setTimeout("tickerIt()", tickerTimer);
+  }
+);
+*/
+
+
+
+//set the quotes array
+/*
+var  tickerItems = new Array(
+    '"<a href="http://www.bindayak.com">Bindayak</a>"<br/><b>Ashutosh</b>',
+    '<img src="http://www.bindayak.com/index_files/image002.jpg" alt="Smiley face" height="42" width="42"/> Bindayak Agrawal Mont-III C Ryan Internatational School, Bangalore<br/><b>Ashutosh</b>',
+    '"There are no great men, only great challenges that ordinary men are forced by circumstances to meet."<br/><b>William F. Halsey</b>',
+    '"Man is only truly great when he acts from his passions."<br/><b>Benjamin Disreali</b>',
+    '"The price of greatness is responsibility."<br/><b>Winston Churchill</b>',
+    '"To achieve great things we must live as if we were never going to die."<br/><b>Marquis de Vauvenargues</b>'
+    );
+*/
+
+var  tickerItems = new Array();
+
+function createTicker(){
+
+    i = 0;
+    tickerIt();
+}
+
+
+
+function tickerIt(){
+
+	if(tickerItems.length > 0){
+
+		if(( i >= tickerItems.length )||(i < 0)){
+			i = 0;
+		}
+
+		//change without effect
+		//$('#ticker').html(tickerItems[i]);
+
+		//change with effect
+
+		$('#ticker').fadeOut("slow", function(){
+			$(this).html(tickerItems[i]).fadeIn("slow");
+			i++;
+		});
+	}
+
+	timer = setTimeout("tickerIt()", tickerTimer);
+
+}
+
+
+function doUpdate(str)
+{
+	//document.getElementById('show').innerHTML=str;
+	console.log(str);
+}
+
+
+</script>
+</body>
+</html>

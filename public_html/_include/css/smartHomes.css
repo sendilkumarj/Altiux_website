@@ -1,0 +1,228 @@
+
+/************** About ************/
+::-webkit-input-placeholder {
+    text-align:center;
+}
+
+::-webkit-input-placeholder { text-align:center;}
+:-moz-placeholder { text-align:center;}
+:-ms-input-placeholder { text-align:center;}
+
+.home-initial-nav .selected a{
+    color: #03a6e8 !important;
+    cursor: default;
+}
+
+.about-headder {
+    background: url("../img/homesandbuildings-desktop-bg.png") 50% 50px no-repeat fixed #fff;
+    /* background-size: 100% 100%; */
+    height: 1200px;
+    position: absolute;
+    margin-top: 0px;
+    top: 0px;
+    left: 0;
+    width: 100%;
+}
+
+#home-carousel {
+    background: #eee;
+    min-height: 450px;
+    position: relative;
+    width: 100% !important;
+    /* min-width: 1000px; */
+    margin: 0;
+    padding: 0;
+    margin-top: -50px;
+    overflow: hidden;
+}
+
+.sectionp-bold {
+    font-size: 13pt;
+    font-weight: bold;
+}
+
+.navbar-default {
+    background-color: #000;
+    border-color: #e7e7e7;
+}
+
+.small-sech3 {
+    color: #a7a9ac !important;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px !important;
+    margin-top: 60px;
+}
+
+.small-secp {
+    font-size: 14px !important;
+    line-height: 20px !important;
+    padding: 0 10px;
+}
+
+.customer-first {
+    padding: 0px 0;
+}
+
+.customer-first .small-sech3 {
+    color: #fff !important;
+    min-height: 30px;
+}
+
+.customer-first .small-secp {
+    color: #fff !important;
+}
+
+.founders-profile {
+    padding: 40px 0 0;
+}
+
+.founderh3 {
+    color: #000 !important;
+}
+
+.founder-role {
+    color: #03a6e8 !important;
+    min-height: 20px;
+    margin-bottom: 10px !important;
+}
+
+.founders-profile .small-secp {
+    color: #000 !important;
+}
+
+.founders-profile img {
+    width: 140px;
+}
+
+.careerppink {
+    color: #03a6e8 !important;
+    min-height: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+a.adjust {
+    padding: 10px 0;
+    display: block;
+    font-weight: bold;
+    color: #03a6e8 !important;
+    border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    width: 20px;
+    text-align: center;
+    text-decoration: none;
+    margin: 0 auto;
+    font-size: 22px;
+}
+
+a.adjust:hover {
+    color: #03a6e8 !important;
+}
+
+.continued {
+    color: #7F8289;
+    font-weight: 300;
+    font-size: 16px;
+    font-family: 'Titillium Web', sans-serif;
+    line-height: 28px;
+    margin-bottom: 0;
+}
+
+.pless {
+    margin-bottom: 0px;
+    min-height: 40px;
+}
+
+.maptxt {
+    padding: 25px 15px;
+}
+
+.secpad {
+    padding: 100px 10px 70px;
+}
+
+.phone {
+    font-weight: bold;
+    padding-top: 10px;
+	letter-spacing: 1px;
+}
+
+.val {
+    width: 96%;
+    width: -webkit-calc(100% - 40px);
+    width: -moz-calc(100% - 40px);
+    width: calc(100% - 40px);
+    height: auto;
+    margin: 10px;
+}
+.val input, .val textarea {
+    width: 96%;
+    width: -webkit-calc(100% - 40px);
+    width: -moz-calc(100% - 40px);
+    width: calc(100% - 40px);
+    height: 50px;
+    margin: 10px;
+    text-align: center;
+    border: 1px solid #000;
+    font-family: MuseoSans-700;
+    font-size: 10pt;
+    text-transform: uppercase;
+}
+
+.val input:focus {
+    background: #000;
+    color: #fff;
+}
+.val textarea:focus {
+    background: #000;
+    color: #fff;
+}
+
+.contentcontainer {
+    margin: 0 auto;
+    display: block;
+    padding: 0;
+    float: none;
+    overflow: auto;
+}
+
+.sectionmorelinkpink {
+    font-family: MuseoSans-900 !important;
+    font-size: 11pt !important;
+    margin: 20px auto 0 !important;
+    color: #fff !important;
+    width: 80px !important;
+    height: 80px !important;
+    line-height: 80px !important;
+    text-align: center;
+    border: none !important;
+    border-top-right-radius: 50%;
+    border-top-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-bottom-left-radius: 50%;
+    background: #03a6e8;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    padding: 2px 17px;
+}
+
+.error {
+    color: #03a6e8;
+    font-weight: normal;
+    font-size: 10pt;
+    margin-top: 0px;
+}
+
+.small-tsech3 {
+    color: #fff !important;
+    font-size: 18px;
+    text-transform: initial;
+    letter-spacing: 0px !important;
+    margin-top: 60px;
+    font-family: Karla-Regular;
+    min-height: 20px;
+    padding-bottom: 0px;
+}

@@ -1,0 +1,136 @@
+<html>
+<head>
+	<title>My Information</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc0">
+	<meta name="resourceName" content="self.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="PERSONALINFO">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ./ALTIUX-DEFAULT-V1/res/common/jquery/ -->
+	<link rel="stylesheet" href="./ALTIUX-DEFAULT-V1/res/common/jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="./ALTIUX-DEFAULT-V1/res/common/jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="./ALTIUX-DEFAULT-V1/res/common/jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+	<link rel="stylesheet" type="text/css" media="all" href="./ALTIUX-DEFAULT-V1/res/common/jqueryui/1.8.2/themes/ui-darkness/jquery-ui.css"/>
+<script>
+	history.forward();
+</script>
+
+</head>
+<body data-role="page" data-theme="a">
+
+<div data-role="header">
+	<h1>My Information</h1>
+</div>
+
+<div id="padding" style="height:100%;width:10%;float:left;padding:0;"></div>
+<div id="image" style="height:100%;width:40%;float:left;padding:0;">
+<p></p>
+<img style='width:200;height:200;' id='base64image' src='data:image/null;base64,null'/>
+</div>
+
+<div id="display" style="height:100%;width:20%;float:left;">
+
+<p><b>ALTXAEC14AMZHIHOME2</b></p>
+<p>Country:India</p>
+<p>Gender:m</p>
+<a href="#popupDialog" data-rel="popup" data-position-to="window" data-role="button" data-inline="true" data-transition="pop">LOGOUT</a>
+
+</div>
+<div id="paddingb" style="height:100%;width:30%;float:left;padding:0;"></div>
+
+<div data-role="popup" id="popupDialog" data-overlay-theme="a" data-theme="c" style="max-width:400px;" class="ui-corner-all">
+			<div data-role="header" data-theme="a" class="ui-corner-top">
+				<h1>Logout</h1>
+			</div>
+			<div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+				<h3 class="ui-title">Are you sure to logout?</h3>
+				<a href="javascript:processLogout()" data-role="button"  data-inline="true" data-transition="flow" data-theme="b">Logout</a>
+				<a href="#" data-role="button" data-inline="true" data-rel="back" data-theme="c">Cancel</a>
+
+			</div>
+		</div>
+
+<script type="text/javascript">
+
+function test(){
+
+ console.log(" test is been called........");
+ window.top.location.href="http://www.google.co.in";
+ var Backlen=history.length;   history.go(-Backlen);
+}
+
+var getLogout = null;
+
+function processLogout()
+{
+	abort(getLogout);
+
+	getLogout = $.ajax({
+	  type: "POST",
+	  url: "http://54.254.250.223:8080/CCCPAgent/userLogin/logout/ALTXAEC14AMZHIHOME2@altiux.com",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "",
+	}).done(function( xml ) {
+		var argName = $(xml).find('loginUrl').text();
+		if(!argName)
+		{
+			console.log( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			console.log( "Redirecting to :" + argName );
+			//add window.top here
+			window.top.location.href=argName;
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Logout Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getLogout = null;
+	});
+
+}
+
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getLogout);
+}
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+	console.log("Self ready ..");
+	amiLoaded = true;
+});
+
+
+</script>
+</body>
+</html>

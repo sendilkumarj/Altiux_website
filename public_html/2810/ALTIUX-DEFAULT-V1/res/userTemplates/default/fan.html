@@ -1,0 +1,274 @@
+<html>
+<head>
+	<title>Fan Control</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc43">
+	<meta name="resourceName" content="fan.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-fan:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+
+<div data-role="header">
+	<h1>Fan</h1><h1>##FRIENDLY_NAME##</h1>
+</div>
+<center>
+<div data-role="fieldcontain" class="pageload">
+<table CELLSPACING=5 width="480" >
+	<tr><td>&nbsp;</td></tr>
+    <tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+			<label>Fan Switch</label>
+		</td>
+  		<td>
+			<a href ="javascript:doAction('fan')">
+			<img name=fan src="" alt="Fan" width="128" height="128" align="middle" />
+			</a>
+		</td>
+    </tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td></td><td><div id="content"></div></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	##DIMMER_START##
+    <tr>
+    <td>
+		<label for="slider-0">Fan Speed</label>
+	</td>
+	<td>
+		<input type="range" name="slider" id="slider01" value="25" min="0" max="100"  />
+	</td>
+	</tr>
+	##DIMMER_END##
+</table>
+</div>
+</center>
+
+<script type="text/javascript">
+
+
+var amiLoaded = false;
+
+var ctrlType	= "##CTRL_TYPE##";
+var onImg		= "cfanon.gif";
+var offImg		= "cfanoff.png";
+var imgUrl      = "##IMAGE_URL##";
+
+function getImageUrl(boolOnOff){
+	if(boolOnOff){
+		return imgUrl + onImg;
+	}else{
+		return imgUrl + offImg;
+	}
+}
+
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getFanSwitch);
+	abort(actFanSwitch);
+	abort(actFanSpeed);
+}
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+	console.log("##CTRL-TYPE##:"+ctrlType);
+
+	if(ctrlType.toLowerCase() == "pedestal"){
+		//document['fan'].height = "256";
+		//document['fan'].width = "256";
+		onImg	= "fanon.gif";
+		offImg	= "fanoff.gif";
+	}
+
+	document['fan'].src = getImageUrl(false);
+
+
+	$("#slider01").bind("change", function(event, ui) {
+	  var slider_value = $('#slider01').val();
+	  changeFanSpeed(slider_value);
+	});
+
+	amiLoaded = true;
+	doStatus();
+	var refreshId = setInterval(function()
+	{
+		if(amiLoaded){
+		 	doStatus();
+		}
+	}, 5000);
+});
+
+
+function doStatus()
+{
+	updateSwitch();
+}
+
+
+var getFanSwitch = null;
+
+function updateSwitch()
+{
+	var prevSliderVal = $('#slider01').val();
+
+	abort(getFanSwitch);
+
+	getFanSwitch = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getFanSpeed",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getFanSpeed xmlns:u=\"##SERVICE_TYPE##\"><argFanSpeed></argFanSpeed></u:getFanSpeed>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argFanSpeed').text();
+		if(!argName)
+		{
+			console.log( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			//alert( "Status Response Received:" + argName );
+			if(prevSliderVal != argName){
+				if(argName == "0")
+				{
+					document['fan'].src=getImageUrl(false);
+					console.log("Turned OFF");
+				}
+				else
+				{
+					document['fan'].src=getImageUrl(true);;
+					console.log("Turned ON");
+				}
+
+				$('#slider01').val(argName);
+				$('#slider01').slider('refresh');
+			}
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getFanSwitch = null;
+	});
+
+}
+
+
+var actFanSwitch = null;
+
+function doAction(img_name)
+{
+	var swState = '1';
+
+	if(document[img_name].src.search(offImg)==-1)
+	{
+		//OFF
+		swState = '0';
+		$('#slider01').val(0);
+		$('#slider01').slider('refresh');
+	}
+
+	abort(actFanSwitch);
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actFanSwitch = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actSetFanSpeed",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actSetFanSpeed xmlns:u=\"##SERVICE_TYPE##\"><argNewFanSpeed>" + swState + "</argNewFanSpeed></u:actSetFanSpeed>",
+	}).done(function( xml ) {
+		//$("#content").empty().html('');
+		//var argName = $(xml).find('argumentName').text();
+	  	//alert( "Response Received:" + argName );
+	  	//console.log(argName);
+	  	updateSwitch();
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actFanSwitch = null;
+	});
+
+}
+
+
+var actFanSpeed = null;
+
+function changeFanSpeed(sliderVal)
+{
+
+	abort(actFanSpeed);
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actFanSpeed = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actSetFanSpeed",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actSetFanSpeed xmlns:u=\"##SERVICE_TYPE##\"><argNewFanSpeed>" + sliderVal + "</argNewFanSpeed></u:actSetFanSpeed>",
+	}).done(function( xml ) {
+			if(sliderVal == '0')
+			{
+				document['fan'].src=getImageUrl(false);;
+			}
+			else
+			{
+				document['fan'].src=getImageUrl(true);;
+			}
+			console.log("Done");
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actFanSpeed = null;
+	});
+}
+
+
+function aclick(){
+	window.location.href = '##SELF_URL##';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

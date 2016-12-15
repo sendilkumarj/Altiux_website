@@ -1,0 +1,455 @@
+<html>
+<head>
+	<title>DRAPES Control</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc17">
+	<meta name="resourceName" content="drapes.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-drapes:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+	<style type="text/css">
+		/*BOTH CURTAIN IMAGES CLASS*/
+		img.curtain{
+			height:300px; /* so jQuery doesn't keep ascpect ration when animating the width '*/
+			z-index:99; /* to show it on top of the content*/
+		}
+
+		/*LEFT CURTAIN IMAGE CLASS*/
+		img.curtainLeft{
+			position:absolute; /*absolute positioning is important*/
+			left:0px; /*position it on left side of the container*/
+		}
+
+		/*RIGHT CURTAIN IMAGE CLASS*/
+		img.curtainRight{
+			position:absolute; /*absolute positioning is important*/
+			right:0px; /*position it on the right side of the container*/
+		}
+
+		/*THE CLASS OF THE WRAPPING DIV (THAT WRAPS EVERYTHING)*/
+		.curtain_wrapper{
+			width:400px; /* same as width of both the images summed */
+			height:300px; /* same as height of the images*/
+			position:relative; /*relative position so we can absolutely position the child elements*/
+			overflow:hidden; /*hide everything out of boundaries (in this case for the description div)*/
+			color:white; /* just styling*/
+			background:black; /* just styling*/
+
+		}
+
+		/*THE TEXT DIV CLASS (BEHIND THE CURTAINS)*/
+		.content{
+			position:relative; /*so we can center it*/
+			width: 300px; /*curtain_wrapper width - shrinked image width (50px is image when shrinked)*/
+			margin:0px auto; /*center it*/
+			display:none; /*we don't want our users to see the content while the curtain images are loading*/
+		}
+
+		/*DESCRIPTION DIV CLASS (THE TEXT ON TOP LEFT SIDE IN THE DEMO)*/
+		.description{
+			position:absolute; /*absolute position is important*/
+			top:0px; /*position it on top of the curtain_wrapper*/
+			z-index:100; /*show it on top of the curtain (remember that they have z-index of 99)*/
+			/*styling bellow*/
+			padding:5px;
+			text-align:center;
+			font-size:15px;
+			background:#eee;
+			border:1px solid #ccc;
+			border-left:0px;
+			border-top:0px;
+			color:black;
+		}
+	</style>
+</head>
+<body data-role="page" data-theme="a">
+
+<div data-role="header">
+	<h1>Drapes / Curtains</h1><h1>##FRIENDLY_NAME##</h1>
+</div>
+<center>
+<div data-role="fieldcontain">
+<table CELLSPACING=10>
+	<tr><td>&nbsp;</td></tr>
+    <tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+			<!-- <label for="slider-0">Sheer Adjust Level</label> -->
+			<!--START THE WRAPPER-->
+			<div class='curtain_wrapper'>
+				<!-- 2 CURTAIN IMAGES START HERE  -->
+				<img class='curtain curtainLeft' src='##IMAGE_URL##curtainLeft.jpg' />
+				<img class='curtain curtainRight' src='##IMAGE_URL##curtainRight.jpg' />
+				<!-- END IMAGES -->
+
+				<!-- START THE CONTENT DIV -->
+				<div class='content'>
+					<!-- YOUR CONTENT HERE -->
+					<h3></h3>
+					<p></p>
+					<!-- END YOUR CONTENT -->
+				</div>
+				<!-- END THE CONTENT DIV -->
+
+				<!-- START DESCRIPTION DIV, WHICH WILL BE SHOWN ON TOP OF THE CURTAIN AND REMOVED WHEN THE CURTAINS OPEN -->
+				<div class='description'>
+					Touch anywhere to operate on cutains
+				</div>
+				<!-- END DESCRIPTION DIV -->
+			</div>
+			<!--END THE WRAPPER-->
+		</td>    </tr>
+	<tr><td>&nbsp;</td></tr>
+	<!--
+	<tr><td><div id="content"></div></td></tr>
+	<tr><td>&nbsp;</td></tr>
+    <tr>
+    	<td>
+			<label for="name">Seen Mood</label>
+		</td>
+		<td>
+    		<input type="number" name="name" id="seenMood" value=""/>
+    	</td>
+	</tr>
+	-->
+</table>
+</div>
+
+</center>
+
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getSheerAdjLevel);
+	abort(getSeenMood);
+	abort(actSheerAdjLevel);
+	abort(actSeenMood);
+	abort(getDrapesStatus);
+	abort(actDrapes);
+}
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+	/*
+	$("#seenMood").bind( "change", function(event, ui) {
+	  	doSeenMoodAct();
+	});
+	*/
+
+	// when user clicks inside the container...
+	$('.curtain_wrapper').click(function(){
+		if(drapesCurrentVal == "0")
+		{
+			doDrapesAct("1");
+			console.log("Opening Drapes");
+		}
+		else
+		{
+			doDrapesAct("0");
+			console.log("Closing Drapes");
+		}
+	});
+
+
+	amiLoaded = true;
+	var refreshId = setInterval(function()
+	{
+		if(amiLoaded){
+		 	doStatus();
+		}
+	}, 5000);
+
+	doStatus();
+});
+
+//drapes variable
+var drapesSpeed 		= 	1000;
+var drapesCurrentVal 	= 	"0";
+
+function toggleDrapes(flag)
+{
+	console.log("toggleDrapes");
+	if(flag == false) //Close drapes if opened
+	{
+		console.log("toggleDrapes:Closing drapes");
+		$('.curtain_wrapper').children('img.curtain').animate({ width: 200 },{duration: drapesSpeed});
+		drapesCurrentVal 	= 	"0";
+	}
+	else //Open drapes if closed
+	{
+		console.log("toggleDrapes:Opening drapes");
+		//..animate the description div by changing it's left position to it's width (but as negative number)...
+		$('.curtain_wrapper').children('.description').animate({'left': -1*$(this).width()});
+
+		//...animate the 2 curtain images to width of 50px with duration of 2 seconds...
+		$('.curtain_wrapper').children('img.curtain').animate({ width: 50 },{duration: drapesSpeed});
+
+		//...show the content behind the curtains with fadeIn function (2 seconds)
+		$('.curtain_wrapper').children('.content').fadeIn(2000);
+		drapesCurrentVal 	= 	"1";
+	}
+}
+
+
+function doStatus()
+{
+	//updateSheerAdjLevel();
+	//updateSeenMood();
+	updateDrapesStatus();
+}
+
+
+var getDrapesStatus = null;
+
+function updateDrapesStatus()
+{
+	abort(getDrapesStatus);
+
+	getDrapesStatus = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getDrapesStatus",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getDrapesStatus xmlns:u=\"##SERVICE_TYPE##\"><argDrapesStatus></argDrapesStatus></u:getDrapesStatus>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argDrapesStatus').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			if(argName == "0")
+			{
+				toggleDrapes(false);
+				console.log("Drapes Closed");
+			}
+			else
+			{
+				toggleDrapes(true);
+				console.log("Drapes Opened");
+			}
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getDrapesStatus = null;
+	});
+
+}
+
+
+var actDrapes = null;
+
+function doDrapesAct(val)
+{
+
+	abort(actDrapes);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actDrapes = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actDrapes",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actDrapes xmlns:u=\"##SERVICE_TYPE##\"><argNewDrapes>" + val + "</argNewDrapes></u:actDrapes>",
+	}).done(function( xml ) {
+		//updateSheerAdjLevel();
+		updateDrapesStatus();
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actDrapes = null;
+	});
+}
+
+
+var getSheerAdjLevel = null;
+
+function updateSheerAdjLevel()
+{
+	var prevSliderVal = $('#slider01').val();
+
+	abort(getSheerAdjLevel);
+
+	getSheerAdjLevel = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getSheerAdjLevel",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getSheerAdjLevel xmlns:u=\"##SERVICE_TYPE##\"><argSheerAdjLevel></argSheerAdjLevel></u:getSheerAdjLevel>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argSheerAdjLevel').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			//alert( "Status Response Received:" + argName );
+			if(prevSliderVal != argName){
+				$('#slider01').val(argName);
+				$('#slider01').slider('refresh');
+				console.log("Sheer Adjust Level Updated");
+			}
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getSheerAdjLevel = null;
+	});
+
+}
+
+
+var getSeenMood = null;
+
+function updateSeenMood()
+{
+
+	abort(getSeenMood);
+
+	getSeenMood = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getSeenMood",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getSeenMood xmlns:u=\"##SERVICE_TYPE##\"><argSeenMood></argSeenMood></u:getSeenMood>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argSeenMood').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			//alert( "Status Response Received:" + argName );
+			var temp = parseInt(argName);
+			$('#seenMood').val(temp);
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getSeenMood = null;
+	});
+}
+
+
+
+var actSheerAdjLevel = null;
+
+function doSheerAdjLevelAct()
+{
+	var sliderVal = $('#slider01').val();
+
+	abort(actSheerAdjLevel);
+
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actSheerAdjLevel = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actSheerAdjLevel",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actSheerAdjLevel xmlns:u=\"##SERVICE_TYPE##\"><argNewSheerAdjLevel>" + sliderVal + "</argNewSheerAdjLevel></u:actSheerAdjLevel>",
+	}).done(function( xml ) {
+			//updateSheerAdjLevel();
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actSheerAdjLevel = null;
+	});
+}
+
+
+var actSeenMood = null;
+
+function doSeenMoodAct()
+{
+	var tempValue = $('#seenMood').val();
+	abort(actSeenMood);
+	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actSeenMood = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actSeenMood",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actSeenMood xmlns:u=\"##SERVICE_TYPE##\"><argNewSeenMood>" + tempValue + "</argNewSeenMood></u:actSeenMood>",
+	}).done(function( xml ) {
+	  	updateSeenMood();
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actSeenMood = null;
+	});
+}
+
+
+
+function aclick(){
+	window.location.href = '##SELF_URL##';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<html>
+<head>
+	<title>DND Control</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc13">
+	<meta name="resourceName" content="dnd.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-dnd:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+<div data-role="header">
+	<h1>Do Not Disturb (DND)</h1>
+</div>
+<center>
+<div data-role="fieldcontain"  class="ui-body ui-body-a">
+<table CELLSPACING=10>
+    <tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+		<label>Room Status</label>
+		</td>
+  		<td>
+		<fieldset data-role="controlgroup" data-type="horizontal">
+				<input type="radio" name="radio-choice-1" id="radio-choice-1" value="1" checked="checked" />
+				<label for="radio-choice-1">Clean</label>
+
+				<input type="radio" name="radio-choice-1" id="radio-choice-2" value="2"  />
+				<label for="radio-choice-2">Dirty</label>
+
+				<input type="radio" name="radio-choice-1" id="radio-choice-3" value="3"  />
+				<label for="radio-choice-3">Check</label>
+		</fieldset>
+		</td>
+    </tr>
+	<tr><td>&nbsp;</td></tr>
+    <tr>
+    <td>
+	<label for="flip-c">DND Status</label>
+	</td>
+	<td>
+	<select name="slider" id="flip-c" data-role="slider" data-theme="a">
+		<option value="0">Clear</option>
+		<option value="1" selected="selected">Set</option>
+	</select>
+	</td>
+	</tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td></td><td><div id="content"></div></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr>
+	<td>
+	<label for="flip-c1">Butler Vallet Call Status</label>
+	</td>
+	<td>
+    <select name="slider" id="flip-c1" data-role="slider" data-theme="a">
+			<option value="0">Clear</option>
+			<option value="1">Set</option>
+	</select>
+    </td>
+	</tr>
+</table>
+</div>
+</center>
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getRoomStatus);
+	abort(getDND);
+	abort(getButlerValetCall);
+	abort(actSetRoomStatus);
+	abort(actSetDND);
+	abort(actButlerValetCall);
+}
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+	console.log("DND ready ..");
+	$("#flip-c").bind("change", function(event, ui) {
+	  doSetDNDAct();
+	});
+
+	$("#flip-c1").bind("change", function(event, ui) {
+	  doButlerValetCallAct();
+	});
+
+	$("#radio-choice-1").click(function() {
+	  	doSetRoomStatusAct();
+	});
+
+
+	$("#radio-choice-2").click(function() {
+	  	doSetRoomStatusAct();
+	});
+
+	$("#radio-choice-3").click(function() {
+	  	doSetRoomStatusAct();
+	});
+
+	amiLoaded = true;
+	var refreshId = setInterval(function()
+	{
+		if(amiLoaded){
+		 	doStatus();
+		}
+	}, 5000);
+
+
+
+	console.log("");
+	doStatus();
+
+});
+
+
+function doStatus()
+{
+	updateRoomStatus();
+	updateDND();
+	updateButlerValletCall();
+}
+
+
+var getRoomStatus = null;
+
+function updateRoomStatus()
+{
+	abort(getRoomStatus);
+
+	getRoomStatus = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getRoomStatus",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getRoomStatus xmlns:u=\"##SERVICE_TYPE##\"><argRoomStatus></argRoomStatus></u:getRoomStatus>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argRoomStatus').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			var temp = parseInt(argName);
+
+			if(temp == 1)
+			{//CLEAN
+				$('#radio-choice-1').attr('checked',true).checkboxradio("refresh");
+				$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+				$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+				console.log("COOL");
+			}
+			else if(temp == 2)
+			{//DIRTY
+				$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+				$('#radio-choice-2').attr('checked',true).checkboxradio("refresh");
+				$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+				console.log("DIRTY");
+			}
+			else
+			{//CHECK
+				$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+				$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+				$('#radio-choice-3').attr('checked',true).checkboxradio("refresh");
+				console.log("CHECK");
+			}
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getRoomStatus = null;
+	});
+}
+
+
+var getDND = null;
+
+function updateDND()
+{
+	abort(getDND);
+	getDND = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getDND",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getDND xmlns:u=\"##SERVICE_TYPE##\"><argDND></argDND></u:getDND>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argDND').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			//alert( "Status Response Received:" + argName );
+			$('#flip-c').val(argName).slider("refresh");
+			console.log("DND Updated");
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getDND = null;
+	});
+
+}
+
+
+var getButlerValetCall = null;
+
+function updateButlerValletCall()
+{
+	abort(getButlerValetCall);
+
+	getButlerValetCall = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getButlerValetCall",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getButlerValetCall xmlns:u=\"##SERVICE_TYPE##\"><argButlerValetCall></argButlerValetCall></u:getButlerValetCall>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argButlerValetCall').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			//alert( "Status Response Received:" + argName );
+			$('#flip-c1').val(argName).slider("refresh");
+			console.log("DND Updated");
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getButlerValetCall = null;
+	});
+
+}
+
+
+var actSetRoomStatus = null;
+
+function doSetRoomStatusAct()
+{
+	var temp = $('input[name=radio-choice-1]:checked').val();
+
+	abort(actSetRoomStatus);
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actSetRoomStatus = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actSetRoomStatus",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actSetRoomStatus xmlns:u=\"##SERVICE_TYPE##\"><argSetRoomStatus>" + temp + "</argSetRoomStatus></u:actSetRoomStatus>",
+	}).done(function( xml ) {
+	  	updateRoomStatus();
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actSetRoomStatus = null;
+	});
+
+}
+
+
+var actSetDND = null;
+
+function doSetDNDAct()
+{
+	var sliderVal = $('#flip-c').val();
+
+	abort(actSetDND);
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actSetDND = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actSetDND",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actSetDND xmlns:u=\"##SERVICE_TYPE##\"><argSetDND>" + sliderVal + "</argSetDND></u:actSetDND>",
+	}).done(function( xml ) {
+			updateDND();
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actSetDND = null;
+	});
+}
+
+var actButlerValetCall = null;
+
+function doButlerValetCallAct()
+{
+	var sliderVal = $('#flip-c1').val();
+	abort(actButlerValetCall);
+ 	// Put an animated GIF image insight of content
+	$("#content").empty().html('<img src="##IMAGE_URL##loading.gif" align="middle"/>');
+	actButlerValetCall = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actButlerValetCall",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actButlerValetCall xmlns:u=\"##SERVICE_TYPE##\"><argButlerValetCall>" + sliderVal + "</argButlerValetCall></u:actButlerValetCall>",
+	}).done(function( xml ) {
+			updateButlerValletCall();
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Error Occured");
+	})
+	.complete(function() {
+		$("#content").empty().html('');
+		actButlerValetCall = null;
+	});
+}
+
+
+function aclick(){
+	window.location.href = '##SELF_URL##';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<html>
+<head>
+	<title>HVAC Control</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc40">
+	<meta name="resourceName" content="hvac-toggle.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-hvac:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.0/jquery.mobile-1.0.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.6.4.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.0/jquery.mobile-1.0.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+<div data-role="header">
+	<h1>HVAC</h1><h1>##FRIENDLY_NAME##</h1>
+</div>
+<style>
+	#power .ui-icon { background:  url(##IMAGE_URL##../icons/power.png) 50% 50% no-repeat; background-size: 24px 22px; }
+</style>
+
+<center>
+<div data-role="fieldcontain">
+<table CELLSPACING=10>
+	<tr>
+		<td>
+			<label>Power</label>
+		</td>
+  		<td>
+  			<!--
+			<a href ="javascript:doPower()">
+				<img name=light src="##COMMON_URL##common/template/icons/power.png" alt="Power" width="64" height="64" align="middle" />
+			</a>
+			-->
+			<a href="javascript:doPower()" data-role="button" data-icon="custom" id="power">On / Off</a>
+		</td>
+    </tr>
+	<tr>
+		<td>
+		<label>Set Temperature Mode</label>
+		</td>
+  		<td>
+		<fieldset data-role="controlgroup" data-type="horizontal">
+				<input type="radio" name="radio-choice-1" id="radio-choice-1" value="1"  />
+				<label for="radio-choice-1">Auto</label>
+
+				<input type="radio" name="radio-choice-1" id="radio-choice-2" value="2"  />
+				<label for="radio-choice-2">Cool</label>
+
+				<input type="radio" name="radio-choice-1" id="radio-choice-3" value="3"  />
+				<label for="radio-choice-3">Fan</label>
+		</fieldset>
+		</td>
+    </tr>
+	<tr><td>&nbsp;</td></tr>
+	<!--
+	<tr>
+			<td>
+				<label>TEMPERATURE</label>
+			</td>
+			<td>
+				<input type="text" name="temperature" id="temperature" value="0" readonly="true" />
+			</td>
+			<td >
+				<label>&deg;C</label>
+			</td>
+			<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+			<td>
+				<label>HUMIDITY</label>
+			</td>
+			<td>
+				<input type="text" name="humidity" id="humidity" value="0" readonly="true" />
+			</td>
+			<td>
+			 	<label>%</label>
+			</td>
+	</tr>
+	-->
+</table>
+</div>
+</center>
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(actPower);
+	abort(actAuto);
+	abort(actFan);
+	abort(actCool);
+	//abort(actTemp);
+	//abort(actHumidity);
+}
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+	$("#radio-choice-1").click(function() {
+	  	doAutoAct();
+	});
+
+
+	$("#radio-choice-2").click(function() {
+	  	doCoolAct();
+	});
+
+	$("#radio-choice-3").click(function() {
+	  	doFanAct();
+	});
+
+	$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+	$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+	$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+
+	amiLoaded = true;
+	/*
+	var refreshId = setInterval(function()
+	{
+		if(amiLoaded){
+		 	doStatus();
+		}
+	}, 5000);
+
+	doStatus();
+	*/
+});
+
+/*
+function doStatus(){
+	doGetTemp();
+	doGetHumidity();
+}
+*/
+
+
+var actPower = null;
+
+function doPower()
+{
+	actPower = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actPower",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actPower xmlns:u=\"##SERVICE_TYPE##\"><argNew>0</argNew></u:actPower>",
+	}).done(function( xml ) {
+
+	})
+	.error(function() {
+		//alert("error");
+	})
+	.complete(function() {
+		actPower = null;
+		$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+	});
+}
+
+
+
+var actAuto = null;
+
+function doAutoAct()
+{
+	actAuto = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actAuto",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actAuto xmlns:u=\"##SERVICE_TYPE##\"><argNew>1</argNew></u:actAuto>",
+	}).done(function( xml ) {
+
+	})
+	.error(function() {
+		//alert("error");
+	})
+	.complete(function() {
+		actAuto = null;
+		$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+	});
+}
+
+
+
+
+var actCool = null;
+
+function doCoolAct()
+{
+	actCool = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actCool",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actCool xmlns:u=\"##SERVICE_TYPE##\"><argNew>3</argNew></u:actCool>",
+	}).done(function( xml ) {
+
+	})
+	.error(function() {
+		//alert("error");
+	})
+	.complete(function() {
+		actCool = null;
+		$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+	});
+}
+
+
+var actFan = null;
+
+function doFanAct()
+{
+	actFan = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actFan",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actFan xmlns:u=\"##SERVICE_TYPE##\"><argNew>2</argNew></u:actFan>",
+	}).done(function( xml ) {
+
+	})
+	.error(function() {
+		//alert("error");
+	})
+	.complete(function() {
+		actFan = null;
+		$('#radio-choice-1').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-2').attr('checked',false).checkboxradio("refresh");
+		$('#radio-choice-3').attr('checked',false).checkboxradio("refresh");
+	});
+}
+
+/*
+ Added code for Temperature and Humidity
+ */
+
+var actTemp = null;
+function doGetTemp()
+{
+
+	actTemp = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getFanRunTime",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getFanRunTime xmlns:u=\"##SERVICE_TYPE##\"><getFanRunTime></getFanRunTime></u:getFanRunTime>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argFanRunTime').text();
+		if(argName){
+			var currVal = parseFloat(argName);
+			currVal = currVal/100;
+			$("#temperature").val(currVal);
+		}
+	})
+	.error(function() {
+	})
+	.complete(function() {
+		actTemp = null;
+	});
+
+}
+
+
+var actHumidity = null;
+function doGetHumidity()
+{
+
+	actHumidity = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getFanRunTime",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getFanRunTime xmlns:u=\"##SERVICE_TYPE##\"><getFanRunTime></getFanRunTime></u:getFanRunTime>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argFanRunTime').text();
+		if(argName){
+			var currVal = parseFloat(argName);
+			$("#humidity").val(currVal);
+		}
+	})
+	.error(function() {
+	})
+	.complete(function() {
+		actHumidity = null;
+	});
+
+}
+
+</script>
+</body>
+</html>

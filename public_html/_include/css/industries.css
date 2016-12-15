@@ -1,0 +1,386 @@
+
+/************** About ************/
+
+
+.home-initial-nav .selected a{
+    color: #03a6e8 !important;
+    cursor: default;
+}
+
+.about-headder {
+    background: url("../img/industries-banner.png") 50% 50px no-repeat fixed #fff;
+    /* background-size: 100% 100%; */
+    height: 1200px;
+    position: absolute;
+    margin-top: 0px;
+    top: 0px;
+    left: 0;
+    width: 100%;
+}
+
+#home-carousel {
+    background: #eee;
+    min-height: 450px;
+    position: relative;
+    width: 100% !important;
+    /* min-width: 1000px; */
+    margin: 0;
+    padding: 0;
+    margin-top: -50px;
+    overflow: hidden;
+}
+
+.sectionp-bold {
+    font-size: 13pt !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+.navbar-default {
+    background-color: #000;
+    border-color: #e7e7e7;
+}
+
+.small-sech3 {
+    color: #000 !important;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px !important;
+    min-height: 40px;
+    padding-bottom: 10px;
+}
+
+.small-secp {
+    font-size: 14px !important;
+    line-height: 20px !important;
+    padding: 0 10px;
+}
+
+.customer-first {
+    padding: 40px 0;
+}
+
+.customer-first .small-sech3 {
+    color: #fff !important;
+}
+
+.customer-first .small-secp {
+    color: #fff !important;
+}
+
+.founders-profile {
+    padding: 40px 0 0;
+}
+
+.founderh3 {
+    color: #000 !important;
+}
+
+.founder-role {
+    color: #03a6e8 !important;
+    min-height: 20px;
+    margin-bottom: 10px !important;
+}
+
+.founders-profile .small-secp {
+    color: #000 !important;
+}
+
+.founders-profile img {
+    width: 140px;
+}
+
+.sectionp-bold-black {
+    font-size: 13pt !important;
+    color: #000 !important;
+    font-weight: bold;
+}
+
+.section-icon {
+    padding-bottom: 20px;
+}
+
+.usage-reference {
+    padding-top: 20px;
+}
+
+.product-icon-list {
+    list-style-type: none;
+}
+
+.product-icon-list li {
+    margin: 0 50px 0 0;
+    float: right;
+    width: 90px;
+}
+
+.product-icon-list li img {
+    margin: 0 0 30px;
+    cursor: pointer;
+}
+
+.product-desc-container {
+    background: #d1d2d4 !important;
+}
+
+.product-desc-container {
+    min-height: 730px;
+}
+
+.section-black {
+    background: #000000 !important;
+    padding: 100px 0 70px;
+    text-align: center;
+}
+
+.contenth3 {
+    font-size: 14pt;
+    color: #03a6e8 !important;
+    line-height: 36px;
+    margin-top: 0px;
+}
+
+.contentp-bold {
+    color: #fff !important;
+    font-weight: bold;
+}
+
+.contentp-small {
+    font-size: 14px !important;
+    line-height: 20px !important;
+    margin-bottom: 10px;
+}
+
+.contentp-small-bold {
+    font-weight: bold;
+    font-size: 14px !important;
+    line-height: 20px !important;
+    margin-bottom: 0px;
+    min-height: 10px;
+}
+
+.product-icon-content {
+    list-style-type: none;
+    padding-left: 100px;
+    text-align: left;
+}
+
+.sectionp {
+    font-family: Karla-Regular;
+    font-size: 12pt;
+    color: #414042;
+    line-height: 22px;
+    min-height: 10px;
+}
+
+
+
+
+
+
+.industries-nav {
+    padding: 40px 0 20px !important;
+    border-bottom: 2px solid #000000;
+}
+
+.manu-nav-icon {
+    cursor: pointer;
+}
+
+.manu-nav-icon:hover {
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+}
+
+
+
+.homes-container {
+    background: url("../img/homesandbuildings-desktop-bg.png") 100% 0 no-repeat #fff;
+    /*background-size: 70%;*/
+}
+
+.semiconductors-container {
+    background: url("../img/hotels-desktop-bg.png") 0 0 no-repeat #fff;
+    /*background-size: 70%;*/
+}
+.buildings-container {
+    background: url("../img/hospitals-desktop-bg.png") 100% 0 no-repeat #fff;
+    /*background-size: 70%;*/
+}
+.smartcity-container {
+    background: url("../img/smartcity-desktop-bg.png") 0 0 no-repeat #fff;
+    /*background-size: 70%;*/
+}
+.consumer-container {
+    background: url("../img/retail-desktop-bg.png") 100% 0 no-repeat #fff;
+    /*background-size: 70%;*/
+}
+.manufacturing-container {
+    background: url("../img/manufacturing-desktop-bg.png") 0 0 no-repeat #fff;
+    /*background-size: 70%;*/
+}
+
+.section-manu-white {
+    background: -moz-linear-gradient(left,  rgba(255,255,255,1) 77%, rgba(255,255,255,1) 89%, rgba(255,255,255,0) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right top, color-stop(77%,rgba(255,255,255,1)), color-stop(89%,rgba(255,255,255,1)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(left,  rgba(255,255,255,1) 77%,rgba(255,255,255,1) 89%,rgba(255,255,255,0) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left,  rgba(255,255,255,1) 77%,rgba(255,255,255,1) 89%,rgba(255,255,255,0) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left,  rgba(255,255,255,1) 77%,rgba(255,255,255,1) 89%,rgba(255,255,255,0) 100%); /* IE10+ */
+    background: linear-gradient(to right,  rgba(255,255,255,1) 77%,rgba(255,255,255,1) 89%,rgba(255,255,255,0) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=1 ); /* IE6-9 */
+
+    padding-top: 100px;
+}
+
+.section-manu-white-right {
+    background: -moz-linear-gradient(left,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 10%, rgba(255,255,255,1) 77%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,0)), color-stop(10%,rgba(255,255,255,1)), color-stop(77%,rgba(255,255,255,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(left,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 10%,rgba(255,255,255,1) 77%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 10%,rgba(255,255,255,1) 77%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 10%,rgba(255,255,255,1) 77%); /* IE10+ */
+    background: linear-gradient(to right,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 10%,rgba(255,255,255,1) 77%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00ffffff', endColorstr='#ffffff',GradientType=1 ); /* IE6-9 */
+
+
+    padding-top: 100px;
+}
+
+.manuh3 {
+    font-size: 18pt !important;
+    padding-top: 0px;
+}
+
+.manup {
+    font-size: 10pt;
+    line-height: 18px;
+    margin-bottom: 10px;
+    min-height: 90px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/****** Responsive ********/
+
+@media (max-width: 480px) {
+
+    .manu-text {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .homes-container {
+        background: url("../img/homesandbuildings-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .semiconductors-container {
+        background: url("../img/hotels-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .buildings-container {
+        background: url("../img/hospitals-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .smartcity-container {
+        background: url("../img/smartcity-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .consumer-container {
+        background: url("../img/retail-mobile-bg.png") 100% 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .manufacturing-container {
+        background: url("../img/manufacturing-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .section-manu-white {
+        background: transparent;
+        padding-top: 200px;
+    }
+    .section-manu-white-right {
+        background: transparent;
+        padding-top: 200px;
+    }
+
+    .manuh3 {
+        font-size: 14pt !important;
+        padding-top: 35%;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+
+    .manu-text {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .homes-container {
+        background: url("../img/homesandbuildings-mobile-bg.png") 100% 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .semiconductors-container {
+        background: url("../img/hotels-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .buildings-container {
+        background: url("../img/hospitals-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .smartcity-container {
+        background: url("../img/smartcity-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .consumer-container {
+        background: url("../img/retail-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .manufacturing-container {
+        background: url("../img/manufacturing-mobile-bg.png") 0 0 no-repeat #fff;
+        background-size: 100%;
+    }
+    .section-manu-white {
+        background: transparent;
+        padding-top: 200px;
+    }
+    .section-manu-white-right {
+        background: transparent;
+        padding-top: 200px;
+    }
+
+    .manuh3 {
+        font-size: 18pt !important;
+        padding-top: 50%;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .manu-text {
+        padding-left: 20px;
+        padding-right: 10px;
+    }
+}
+
+@media (min-width: 992px) {
+    .manu-text {
+        padding-left: 100px;
+        padding-right: 20px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .manu-text {
+        padding-left: 180px;
+        padding-right: 60px;
+    }
+}
+/***************/
+

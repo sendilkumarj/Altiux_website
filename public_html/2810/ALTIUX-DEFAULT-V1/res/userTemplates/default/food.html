@@ -1,0 +1,310 @@
+<!-- saved from url=(0022)http://internet.e-mail -->
+<html>
+<head>
+	<title>Food</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc3">
+	<meta name="resourceName" content="food.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:info-service-food:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+
+<div data-role="header">
+	<h1>Food Menu</h1>
+</div>
+<center>
+<div data-role="fieldcontain">
+<table CELLSPACING=5 width="480">
+	<tr>
+	<td>
+		<label for="select-choice-1" class="select">Main Category</label>
+		<select name="select-choice-1" id="select-choice-1">
+    </td>
+	</tr>
+	<tr>
+	<td>
+		<label for="select-choice-2" class="select">Sub Category</label>
+		<select name="select-choice-2" id="select-choice-2">
+    </td>
+	</tr>
+	<tr>
+	<td>
+		<label for="select-choice-3" class="select">Item List</label>
+		<select name="select-choice-3" id="select-choice-3">
+    </td>
+	</tr>
+    <tr>
+	</tr>
+</table>
+</div>
+<div id="details"></div>
+</center>
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getItemInfo);
+	abort(getCatList);
+	abort(getSubCatList);
+	abort(getItemList);
+}
+
+
+<!-- Initialization -->
+$(document).ready(function(){
+	console.log("");
+
+	$("#select-choice-1").bind("change", function(event, ui) {
+		doSubCatListAct();
+	});
+
+	$("#select-choice-2").bind("change", function(event, ui) {
+		doItemListAct();
+	});
+
+	$("#select-choice-3").bind("change", function(event, ui) {
+		doItemListDisplay();
+	});
+
+	doCatListAct();
+	amiLoaded = true;
+});
+
+
+
+
+var getCatList = null;
+
+function doCatListAct()
+{
+	abort(getCatList);
+
+	getCatList = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetCatList",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetCatList xmlns:u=\"##SERVICE_TYPE##\"><u:argParentId>1</u:argParentId></u:actGetCatList>",
+	}).done(function( xml ) {
+		//process category id list
+		//var xml = "<actGetCatList><catId><id>1</id><name>A</name></catId><catId><id>2</id><name>B</name></catId><catId><id>3</id><name>C</name></catId></actGetCatList>";
+		//alert( "Parsing:" + xml);
+
+		var _catId 		= "";
+		var _catName 	= "";
+		var _lisHtml 	= "";
+
+		$(xml).find('CatList').each(function(){
+			_catId 		= $(this).find('argCatId').text();
+			_catName 	= $(this).find('argCatName').text();
+			_catDesc 	= $(this).find('argDescription').text();
+			_lisHtml 	= _lisHtml + "<option value=\'" + _catId + "\'>" + _catName + "</option>";
+		});
+
+		$("#select-choice-1").html(_lisHtml);
+
+		console.log("Updated");
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getCatList = null;
+	});
+
+}
+
+
+
+var getSubCatList = null;
+
+function doSubCatListAct()
+{
+	abort(getSubCatList);
+
+	var _catId = $("#select-choice-1").val();
+
+	getSubCatList = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetSubCatList",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetSubCatList xmlns:u=\"##SERVICE_TYPE##\"><argCatId>" + _catId + "</argCatId></u:actGetSubCatList>",
+	}).done(function( xml ) {
+		//process category id list
+		//var xml = "<argSubCatInfoList><subId><id>1</id><name>SubItem1</name></subId><subId><id>2</id><name>SubItem2</name></subId><subId><id>3</id><name>SubItem3</name></subId></argSubCatInfoList>";
+		//alert( "Parsing:" + xml);
+
+		var _subId 		= "";
+		var _name 		= "";
+		var _lisHtml 	= "";
+
+		$(xml).find('SubCatList').each(function(){
+			_subId 		= $(this).find('argSubCatId').text();
+			_name 		= $(this).find('argSubCatName').text();
+			_desc 		= $(this).find('argDescription').text();
+			_lisHtml 	= _lisHtml + "<option value=\'" + _subId + "\'>" + _name + "</option>";
+		});
+
+		$("#select-choice-2").html(_lisHtml);
+
+		console.log("Updated");
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getSubCatList = null;
+	});
+
+}
+
+
+
+var getItemList = null;
+
+function doItemListAct()
+{
+	abort(getItemList);
+
+	var _catId = $("#select-choice-2").val();
+
+	getItemList = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetItemList",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetItemList xmlns:u=\"##SERVICE_TYPE##\"><argSubCatId>" + _catId + "</argSubCatId></u:actGetItemList>",
+	}).done(function( xml ) {
+		//process category id list
+		//var xml = "<argSubCatInfoList><subId><id>1</id><name>SubItem1</name></subId><subId><id>2</id><name>SubItem2</name></subId><subId><id>3</id><name>SubItem3</name></subId></argSubCatInfoList>";
+		//alert( "Parsing:" + xml);
+
+		var _subId 		= "";
+		var _name 		= "";
+		var _lisHtml 	= "";
+
+		$(xml).find('ItemList').each(function(){
+			_Id 		= $(this).find('argItemId').text();
+			_name 		= $(this).find('argItemName').text();
+			_desc 		= $(this).find('argDescription').text();
+			_rating 	= $(this).find('argRating').text();
+			_type 		= $(this).find('argType').text();
+			_price 		= $(this).find('argPrice').text();
+			_country	= $(this).find('argCountry').text();
+			_icon 		= $(this).find('argImageUrl').text();
+			_lisHtml 	= _lisHtml + "<option value=\'" + _Id + "\'>" + _name + "</option>";
+		});
+
+		$("#select-choice-3").html(_lisHtml);
+
+		console.log("Updated");
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getItemList = null;
+	});
+
+}
+
+
+var getItemInfo = null;
+
+function doItemListDisplay()
+{
+
+	abort(getItemInfo);
+
+	var _catId 	= $("#select-choice-1").val();
+	var _subId 	= $("#select-choice-2").val();
+	var _itemId = $("#select-choice-3").val();
+
+	//alert("Category:" + _catId +  " Sub:" + _subId);
+
+	getItemInfo = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##actGetItemDetails",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:actGetItemDetails xmlns:u=\"##SERVICE_TYPE##\"><argItemId>" + _itemId + "</argItemId></u:actGetItemDetails>",
+	}).done(function( xml ) {
+		var _name = $(xml).find('argItemName').text();
+		if(!_name)
+		{
+			alert( "Malformed XML Status Response Received:" + _name );
+		}
+		else
+		{
+			_desc 		= $(xml).find('argDescription').text();
+			_rating 	= $(xml).find('argRating').text();
+			_type 		= $(xml).find('argType').text();
+			_price 		= $(xml).find('argPrice').text();
+			_country	= $(xml).find('argCountry').text();
+			_icon 		= $(xml).find('argImageUrl').text();
+
+			var _descHtml = "<table cellspacing=\"5\" width=\"480\"><tr><td><\/td><\/tr><tr><td><label>" + _name + "<\/label><\/td><td><img width=\"120\" height=\"120\" border=\"0\" src=\'" + _icon + "\' title=\'"+ _name + "\'><\/td><\/tr><tr><td><label>Description<\/label><\/td><td>" + _desc + "<\/td><\/tr><tr><td><label>Rating<\/label><\/td><td>" + _rating + "<\/td><\/tr><tr><td><label>Type</label><\/td><td>" + _type + "<\/td><\/tr><tr><td><label>Price</label><\/td><td>" + _price + "<\/td><\/tr><tr><td><label>Country</label><\/td><td>" + _country + "<\/td><\/tr><\/table>";
+			//alert(_descHtml);
+			$("#details").html(_descHtml);
+		}
+	})
+	.error(function() {
+		//alert("error");
+		console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getItemInfo = null;
+	});
+
+}
+
+
+
+
+function aclick(){
+	window.location.href = '##SELF_URL##';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

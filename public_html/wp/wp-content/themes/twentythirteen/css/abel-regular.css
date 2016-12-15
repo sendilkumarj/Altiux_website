@@ -1,0 +1,8 @@
+@font-face {
+    font-family: 'AbelRegular';
+    src: url('abel-regular.eot');
+    src: url('abel-regular.eot') format('embedded-opentype'),
+         url('abel-regular.woff') format('woff'),
+         url('abel-regular.ttf') format('truetype'),
+         url('abel-regular.svg#AbelRegular') format('svg');
+}

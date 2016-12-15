@@ -1,0 +1,149 @@
+<html>
+<head>
+	<title>Occupany Status</title>
+	<meta name="resourceId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc11">
+	<meta name="resourceName" content="od.html">
+	<meta name="templateId" content="ac29e7f7-2536-4f4c-925c-c8f9c4103ffc">
+	<meta name="serviceType" content="urn:schemas-p-device-com:service:ras-service-occupancy:1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- ##COMMON_URL##jquery/ -->
+	<link rel="stylesheet" href="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+	<script type="text/javascript" src="##COMMON_URL##jquery/jquery-1.8.3.min.js"></script>
+	<script type="text/javascript" src="##COMMON_URL##jquery/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+</head>
+<body data-role="page" data-theme="a">
+
+<div data-role="header">
+	<h1>Occupancy</h1>
+</div>
+<center>
+<div data-role="fieldcontain">
+<table CELLSPACING=5 width="480" >
+	<tr><td>&nbsp;</td></tr>
+    <tr><td>&nbsp;</td></tr>
+	<tr>
+		<td>
+			<label>Occupancy Status</label>
+		</td>
+  		<td>
+			<img name=occupany src="##IMAGE_URL##occupancy.gif" alt="Occupany" width="128" height="128" align="middle" />
+		</td>
+		<td>
+			<p id="tstatus"></p>
+		</td>
+    </tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td></td><td><div id="content"></div></td></tr>
+	<tr><td>&nbsp;</td></tr>
+</table>
+</div>
+</center>
+<script type="text/javascript">
+
+var amiLoaded = false;
+
+function onExit(){
+	amiLoaded = false;
+	console.log("onExit called...");
+	abortAll();
+}
+
+window.onunload = onExit;
+
+function abort(ajaxHandle){
+	console.log("Aborting requests..");
+	if((null != ajaxHandle) && (ajaxHandle.readyState != 0)){
+		console.log("Aborted requests..");
+		ajaxHandle.abort();
+		ajaxHandle = null;
+	}
+	$("#content").empty().html('');
+}
+
+
+function abortAll(){
+	console.log("abortAll called...");
+	abort(getCheckOccupancy);
+}
+
+<!-- Initialization -->
+$(document).ready(function(){
+
+	amiLoaded = true;
+	var refreshId = setInterval(function()
+	{
+		if(amiLoaded){
+		 	doStatus();
+		}
+	}, 5000);
+
+
+	console.log("");
+	doStatus();
+
+});
+
+
+function doStatus()
+{
+	updateCheckOccupancy();
+}
+
+var getCheckOccupancy = null;
+
+function updateCheckOccupancy()
+{
+	abort(getCheckOccupancy);
+
+	getCheckOccupancy = $.ajax({
+	  type: "POST",
+	  url: "##CTRL_URL##getCheckOccupancy",
+	  contentType: "text/xml; charset=utf-8",
+	  crossDomain: true,
+	  processData: false,
+	  data: "<?xml version=\"1.0\"?><u:getCheckOccupancy xmlns:u=\"##SERVICE_TYPE##\"><argCheckOccupancy></argCheckOccupancy></u:getCheckOccupancy>",
+	}).done(function( xml ) {
+		var argName = $(xml).find('argCheckOccupancy').text();
+		if(!argName)
+		{
+			//alert( "Malformed XML Status Response Received:" + argName );
+		}
+		else
+		{
+			if(argName == "1")
+			{
+				document['occupany'].style.backgroundColor = "#F7FE2E";
+				$('#tstatus').text('Occupied');
+				console.log("Occupied");
+
+			}
+			else
+			{
+				document['occupany'].style.backgroundColor = '';
+				$('#tstatus').text('Unoccupied');
+				console.log("Unoccupied");
+			}
+		}
+	})
+	.error(function() {
+		//alert("error");
+		//console.log("Status Error Occured");
+	})
+	.complete(function() {
+		//$("#content").empty().html('');
+		getCheckOccupancy = null;
+	});
+
+}
+
+
+
+function aclick(){
+	window.location.href = '##SELF_URL##';
+	console.log("clicked header");
+}
+
+
+</script>
+</body>
+</html>

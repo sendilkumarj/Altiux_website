@@ -1,0 +1,1 @@
+[28-May-2014 16:46:21 Asia/Calcutta] PHP Fatal error:  Call to undefined function get_header() in /home/altiux/public_html/wp/wp-content/themes/twentythirteen/index.php on line 17

@@ -1,0 +1,70 @@
+
+html, body {
+height: 100%;
+padding: 0;
+}
+
+#header
+{
+	
+}
+
+#nav .ui-btn-inner { font-size: 15px !important; }
+
+
+
+#nav
+{
+	float: left;
+	width: 25%;
+	border:1px solid #a1a1a1;
+	overflow : auto;
+	 position : absolute;
+    top      : 30px;
+    right    : 0;
+    bottom   : 25px;
+    left     : 0;
+
+
+}
+
+#pcontent
+{
+	float: right;	
+	width: 70%;	
+	text-align: center;
+}
+#icontent
+{
+ position: absolute;
+    display: block;
+    border: 0;
+    height: 100%;
+    width: 70%;
+}
+
+
+
+
+.ui-content {
+    position : absolute;
+    top      : 35px;
+    right    : 0;
+    bottom   : 35px;
+    left     : 0;
+}
+
+
+
+#footer
+{
+		
+	}
+
+div
+{
+word-wrap: break-word;
+}
+
+[data-role=page]{height: 100% !important; position:relative !important;}
+[data-role=footer]{bottom:0; position:absolute !important; top: auto !important; width:100%;} 
